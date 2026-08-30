@@ -1,42 +1,1867 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Picture This</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-      body {
-        background-color: #0f172a;
-        color: #e2e8f0;
-      }
-      /* Custom scrollbar for a cleaner app look */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #1e293b; 
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #475569; 
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #64748b; 
-      }
-    </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3"
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Picture This</title>
+<style>
+/* ---------- base ---------- */
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:#020617;color:#e2e8f0;overflow:hidden;
+  font:14px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+h1,h2,h3{margin:0}
+p{margin:0}
+.hidden{display:none!important}
+.muted{color:#94a3b8}
+.tiny{font-size:11px}
+.link{background:none;border:0;color:#64748b;text-decoration:underline;cursor:pointer;font-size:13px;padding:4px}
+.link:hover{color:#fff}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:#1e293b}
+::-webkit-scrollbar-thumb{background:#475569;border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:#64748b}
+
+/* ---------- buttons ---------- */
+.btn{background:#1e293b;border:1px solid #334155;color:#e2e8f0;padding:8px 14px;border-radius:8px;
+  cursor:pointer;font-weight:600;font-size:13px;transition:background .15s,border-color .15s;white-space:nowrap}
+.btn:hover{background:#334155}
+.btn:disabled{opacity:.5;cursor:default}
+.btn-sm{padding:6px 11px;font-size:12px}
+.btn-xs{padding:4px 8px;font-size:11px;border-radius:6px}
+.btn-primary{background:#2563eb;border-color:#3b82f6;color:#fff}
+.btn-primary:hover{background:#3b82f6}
+.btn-good{background:#16a34a;border-color:#22c55e;color:#fff}
+.btn-good:hover{background:#22c55e}
+.btn-danger{background:#dc2626;border-color:#ef4444;color:#fff}
+.btn-danger:hover{background:#ef4444}
+.btn-block{width:100%;justify-content:center;display:flex}
+.icon-btn{background:#334155;border:1px solid #475569;color:#cbd5e1;width:34px;height:34px;
+  border-radius:8px;display:grid;place-items:center;cursor:pointer}
+.icon-btn:hover{color:#fff;background:#475569}
+.icon-btn.on{background:#2563eb;border-color:#3b82f6;color:#fff}
+svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round}
+svg.i.sm{width:14px;height:14px}
+svg.i.lg{width:40px;height:40px;stroke-width:1.2}
+
+/* ---------- screens ---------- */
+.screen{position:fixed;inset:0}
+.app{display:flex;flex-direction:column}
+
+/* ---------- dashboard ---------- */
+.dash{display:grid;place-items:center;background:#0f172a;overflow:auto;padding:32px 16px}
+.dash-glow{position:absolute;border-radius:50%;filter:blur(90px);opacity:.18;pointer-events:none}
+.dash-glow.a{width:260px;height:260px;background:#3b82f6;top:40px;left:40px}
+.dash-glow.b{width:380px;height:380px;background:#a855f7;bottom:20px;right:40px}
+.dash-inner{position:relative;width:100%;max-width:900px;text-align:center}
+.dash-title{font-size:clamp(38px,7vw,62px);font-weight:800;letter-spacing:-.02em;
+  background:linear-gradient(90deg,#93c5fd,#d8b4fe,#f9a8d4);-webkit-background-clip:text;
+  background-clip:text;color:transparent;margin-bottom:18px}
+.dash-sub{color:#cbd5e1;font-size:18px;font-weight:300;max-width:560px;margin:0 auto 40px}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-bottom:32px}
+.dash-card{background:rgba(30,41,59,.8);border:1px solid #334155;border-radius:22px;padding:28px 20px;
+  display:flex;flex-direction:column;align-items:center;cursor:pointer;color:inherit;text-align:center;
+  transition:transform .15s,background .15s,box-shadow .15s}
+.dash-card:hover{background:rgba(51,65,85,.85);transform:translateY(-3px);box-shadow:0 14px 40px rgba(0,0,0,.4)}
+.dash-ico{width:66px;height:66px;border-radius:50%;display:grid;place-items:center;margin-bottom:18px}
+.dash-ico.b{background:rgba(59,130,246,.18);color:#93c5fd}
+.dash-ico.g{background:rgba(16,185,129,.18);color:#6ee7b7}
+.dash-ico.p{background:rgba(168,85,247,.18);color:#d8b4fe}
+.dash-card h3{font-size:20px;color:#fff;margin-bottom:6px}
+.dash-card p{font-size:13px;color:#94a3b8}
+.help{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;text-align:left;
+  max-width:520px;margin:14px auto 0;font-size:13px;color:#cbd5e1}
+.help p+p{margin-top:8px}
+
+/* ---------- top bar ---------- */
+.topbar{height:60px;flex:0 0 auto;background:#0f172a;border-bottom:1px solid #1e293b;
+  display:flex;align-items:center;justify-content:space-between;padding:0 16px;gap:12px;z-index:40}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;font-size:17px;color:#fff}
+.brand-dot{width:26px;height:26px;border-radius:8px;background:linear-gradient(45deg,#60a5fa,#c084fc);
+  transition:transform .2s}
+.brand:hover .brand-dot{transform:rotate(12deg)}
+.steps{display:flex;align-items:center;gap:14px;font-size:12px;font-weight:700;letter-spacing:.04em}
+.step{display:flex;align-items:center;gap:7px;color:#475569}
+.step.on{color:#60a5fa}
+.step i{width:22px;height:22px;border:2px solid currentColor;border-radius:50%;display:grid;
+  place-items:center;font-style:normal;font-size:11px}
+.step-sep{width:26px;height:1px;background:#1e293b}
+.topbar-actions{display:flex;gap:8px}
+@media(max-width:860px){.steps{display:none}}
+
+/* ---------- main / views ---------- */
+.main{flex:1;position:relative;overflow:hidden}
+.view{position:absolute;inset:0;display:flex;flex-direction:column;min-height:0}
+.view.pad{padding:16px;gap:14px}
+.col{display:flex;flex-direction:column;min-height:0;flex:1;gap:14px}
+.bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:14px}
+.bar h2{font-size:20px;color:#fff}
+.toolbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;background:#1e293b;border:1px solid #334155;
+  border-radius:12px;padding:10px 12px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field>span{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8}
+.field input{width:96px;background:#020617;border:1px solid #475569;border-radius:7px;padding:6px 8px;
+  text-align:right;font-variant-numeric:tabular-nums}
+.field input:focus{outline:none;border-color:#3b82f6}
+.field input.guess{background:#0f172a;border-color:rgba(30,64,175,.6);color:#bfdbfe}
+.field.wide input{width:100%;text-align:left}
+.check{display:flex;align-items:center;gap:6px;font-size:13px;color:#cbd5e1;cursor:pointer}
+.sep{width:1px;align-self:stretch;background:#334155;margin:0 2px}
+.stage-pad{flex:1;min-height:0;background:#020617;border-radius:12px;display:flex;align-items:center;
+  justify-content:center;padding:14px;overflow:auto}
+.notice{background:rgba(37,99,235,.16);border:1px solid rgba(59,130,246,.45);color:#bfdbfe;
+  border-radius:9px;padding:8px 14px;font-size:13px;text-align:center}
+.dropzone{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  border:2px dashed #334155;border-radius:16px;background:rgba(30,41,59,.4);padding:32px;text-align:center}
+.dropzone h3{font-size:20px;color:#fff}
+.dropzone p{max-width:440px;color:#94a3b8}
+
+/* ---------- corner selector ---------- */
+.cs{position:relative;max-width:min(100%,1000px);margin:0 auto;border:1px solid #334155;border-radius:12px;
+  overflow:hidden;background:#0f172a;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.cs-label{position:absolute;top:12px;left:12px;z-index:20;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
+  padding:8px 14px;border-radius:8px;pointer-events:none;max-width:70%}
+.cs-label h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#cbd5e1}
+.cs-label p{font-size:11px;color:#94a3b8;margin-top:2px}
+.cs-eyetag{position:absolute;top:12px;right:12px;z-index:20;background:#2563eb;color:#fff;font-size:11px;
+  font-weight:700;padding:7px 14px;border-radius:999px;pointer-events:none}
+.cs-stage{position:relative;user-select:none;touch-action:none;line-height:0}
+.cs-stage.pick{cursor:crosshair}
+.cs-img{display:block;width:100%;height:auto;opacity:.85;pointer-events:none}
+.cs-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:10}
+.cs-poly polygon{fill:rgba(56,189,248,.10);stroke:#38bdf8;stroke-width:2;stroke-dasharray:4 4}
+.cs-handle{position:absolute;z-index:20;width:32px;height:32px;margin:-16px 0 0 -16px;cursor:move;
+  display:grid;place-items:center;transition:width .1s,height .1s,margin .1s}
+.cs-handle .knob{width:100%;height:100%;border-radius:50%;border:2px solid #fff;display:grid;place-items:center;
+  font-size:10px;font-weight:700;color:#fff;box-shadow:0 3px 8px rgba(0,0,0,.5)}
+.cs-handle.drag{width:64px;height:64px;margin:-32px 0 0 -32px}
+.cs-handle.drag .knob{background:none!important;border:0;position:relative}
+.cs-handle.drag .knob::before,.cs-handle.drag .knob::after{content:"";position:absolute;background:rgba(255,255,255,.85)}
+.cs-handle.drag .knob::before{left:0;right:0;height:1px;top:50%}
+.cs-handle.drag .knob::after{top:0;bottom:0;width:1px;left:50%}
+.cs-handle.drag .dot{position:absolute;width:16px;height:16px;border-radius:50%;border:2px solid #fff}
+.cs-handle .dot{display:none}
+.cs-handle.drag .dot{display:block}
+
+/* ---------- art studio ---------- */
+.studio{display:flex;gap:16px;flex:1;min-height:0}
+.panel{width:310px;flex:0 0 auto;background:#1e293b;border:1px solid #334155;border-radius:12px;
+  padding:18px;overflow-y:auto;display:flex;flex-direction:column;gap:22px}
+.panel h3{font-size:15px;color:#fff;border-bottom:1px solid #334155;padding-bottom:8px;margin-bottom:12px}
+.panel label>span{font-size:11px;color:#94a3b8;display:block;margin-bottom:4px}
+.panel input[type=text],.panel input[type=number]{width:100%;background:#020617;border:1px solid #475569;
+  border-radius:7px;padding:7px 9px}
+.panel input:focus{outline:none;border-color:#3b82f6}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stack{display:flex;flex-direction:column;gap:12px}
+input[type=range]{width:100%;accent-color:#3b82f6}
+.swatches{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.swatch{width:24px;height:24px;border-radius:50%;border:1px solid #475569;cursor:pointer;padding:0}
+.swatch.on{outline:2px solid #fff;outline-offset:1px}
+input[type=color]{width:26px;height:26px;padding:0;border:1px solid #475569;border-radius:6px;
+  background:none;cursor:pointer}
+.row-between{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.preview{flex:1;min-width:0;background:#020617;border-radius:12px;display:flex;align-items:center;
+  justify-content:center;padding:32px;position:relative;overflow:hidden}
+.preview::before{content:"";position:absolute;inset:0;opacity:.10;pointer-events:none;
+  background-image:radial-gradient(circle at 1px 1px,#cbd5e1 1px,transparent 0);background-size:20px 20px}
+.frame-box{position:relative;box-sizing:content-box;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.frame-box img{display:block;width:100%;height:100%}
+.frame-cap{position:absolute;left:50%;transform:translateX(-50%);bottom:-30px;font-size:11px;
+  color:#94a3b8;white-space:nowrap}
+@media(max-width:900px){.studio{flex-direction:column}.panel{width:100%;flex:0 0 auto;max-height:46%}}
+
+/* ---------- gallery ---------- */
+#view-gallery{flex-direction:row}
+.sidebar{width:250px;flex:0 0 auto;background:#0f172a;border-right:1px solid #1e293b;
+  display:flex;flex-direction:column;z-index:20}
+.side-head{padding:14px;border-bottom:1px solid #1e293b;background:#1e293b}
+.side-head h2{font-size:17px;color:#fff;margin-bottom:10px}
+.side-list{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:12px}
+.art-card{background:#1e293b;border:1px solid transparent;border-radius:9px;padding:8px;cursor:grab}
+.art-card:hover{border-color:#3b82f6}
+.art-thumb{background:#334155;border-radius:6px;padding:8px;display:grid;place-items:center;
+  min-height:70px;margin-bottom:8px}
+.art-thumb img{max-height:120px;max-width:100%;object-fit:contain;display:block}
+.art-meta{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+.art-meta p{font-size:12px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px}
+.art-acts{display:flex;gap:2px}
+.mini{background:none;border:0;color:#64748b;cursor:pointer;padding:2px;border-radius:4px}
+.mini:hover{color:#60a5fa}
+.mini.del:hover{color:#f87171}
+.side-foot{padding:12px;border-top:1px solid #1e293b;background:#1e293b;display:flex;flex-direction:column;gap:8px}
+.side-foot h3{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8}
+.side-foot select{width:100%;background:#020617;border:1px solid #475569;border-radius:7px;padding:5px;font-size:12px}
+.layout-save{background:#020617;border:1px solid #2563eb;border-radius:8px;padding:8px;display:flex;
+  flex-direction:column;gap:6px}
+.layout-save input{background:#1e293b;border:1px solid #334155;border-radius:6px;padding:5px;font-size:12px;width:100%}
+.wallpane{flex:1;position:relative;background:#000;overflow:hidden;touch-action:none}
+.wallstage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0b1120}
+.wallstage.crosshair{cursor:crosshair}
+.wallimg{width:100%;height:100%;object-fit:contain;pointer-events:none;display:block}
+.tools{position:absolute;top:12px;right:12px;z-index:30;display:flex;flex-direction:column;
+  align-items:flex-end;gap:8px;max-width:80%}
+.tool-group{display:flex;gap:4px;background:rgba(30,41,59,.92);border:1px solid #334155;border-radius:10px;
+  padding:5px;backdrop-filter:blur(6px);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.tool{background:none;border:0;color:#94a3b8;font-size:12px;font-weight:700;padding:6px 11px;
+  border-radius:6px;cursor:pointer;white-space:nowrap}
+.tool:hover{background:#334155;color:#fff}
+.tool.on{background:#2563eb;color:#fff}
+.tool.on.warn{background:#dc2626}
+.tool.on.snap{background:#db2777}
+.tool-label{font-size:10px;font-weight:700;text-transform:uppercase;color:#64748b;align-self:center;padding:0 6px}
+.hint{position:absolute;top:12px;left:12px;z-index:30;font-size:12px;padding:8px 12px;border-radius:9px;
+  pointer-events:none;border:1px solid;box-shadow:0 10px 30px rgba(0,0,0,.5);max-width:260px}
+.hint.info{background:rgba(30,41,59,.92);border-color:#475569;color:#cbd5e1}
+.hint.add{background:rgba(37,99,235,.92);border-color:#60a5fa;color:#fff}
+.hint.rem{background:rgba(220,38,38,.92);border-color:#f87171;color:#fff}
+.overlay-svg{position:absolute;inset:0;width:100%;height:100%;z-index:15;pointer-events:none}
+.placed{position:absolute;top:0;left:0;transform-origin:0 0}
+.placed .inner{width:100%;height:100%;position:relative;box-sizing:border-box;overflow:hidden;background:#fff}
+.placed .inner img{width:100%;height:100%;display:block}
+.placed.sel .inner{outline:2px solid #3b82f6;outline-offset:-1px}
+.placed-acts{position:absolute;top:-46px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
+.round{width:32px;height:32px;border-radius:50%;border:0;display:grid;place-items:center;cursor:pointer;
+  color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.6)}
+.round.edit{background:#334155}.round.edit:hover{background:#475569}
+.round.del{background:#dc2626}.round.del:hover{background:#ef4444}
+@media(max-width:900px){#view-gallery{flex-direction:column}
+  .sidebar{width:100%;height:210px;border-right:0;border-bottom:1px solid #1e293b}
+  .side-list{flex-direction:row;overflow-x:auto}.art-card{min-width:150px}}
+
+/* ---------- toast ---------- */
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);z-index:200;background:#1e293b;
+  border:1px solid #475569;color:#e2e8f0;padding:11px 20px;border-radius:10px;font-size:13px;
+  box-shadow:0 14px 40px rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#busy{position:fixed;inset:0;z-index:300;background:rgba(2,6,23,.8);display:grid;place-items:center;
+  font-weight:600;letter-spacing:.03em}
+</style>
+</head>
+<body>
+
+<!-- =============== DASHBOARD =============== -->
+<div id="screen-dashboard" class="screen dash">
+  <div class="dash-glow a"></div><div class="dash-glow b"></div>
+  <div class="dash-inner">
+    <h1 class="dash-title">Picture This</h1>
+    <p class="dash-sub">See exactly how your art will look on the wall &mdash; before you hammer a single nail.</p>
+    <div class="dash-grid">
+      <button class="dash-card" id="btn-fresh">
+        <span class="dash-ico b"><svg class="i lg" viewBox="0 0 24 24"><path d="M12 4v16M20 12H4"/></svg></span>
+        <h3>Start fresh</h3><p>Begin a new room project</p>
+      </button>
+      <button class="dash-card" id="btn-continue">
+        <span class="dash-ico g"><svg class="i lg" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
+        <h3>Continue</h3><p>Resume your last session</p>
+      </button>
+      <label class="dash-card">
+        <span class="dash-ico p"><svg class="i lg" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M16 8l-4-4m0 0L8 8m4-4v12"/></svg></span>
+        <h3>Load file</h3><p>Open a saved .json project</p>
+        <input type="file" id="file-project" accept=".json,application/json" hidden>
+      </label>
+    </div>
+    <button class="link" id="btn-help">How does saving work?</button>
+    <div class="help hidden" id="help-box">
+      <p><strong>Save session</strong> &mdash; keeps your work in this browser on this device. Handy short term, but it can run out of room once you have a lot of photos.</p>
+      <p><strong>Download file</strong> &mdash; writes a <code>.json</code> file containing your wall, every picture and every saved arrangement. This is the safe way to keep a project for good, or move it to another computer.</p>
+      <p><strong>Load file</strong> &mdash; reopens a project you downloaded earlier.</p>
+    </div>
+  </div>
+</div>
+
+<!-- =============== APP =============== -->
+<div id="screen-app" class="screen app hidden">
+  <header class="topbar">
+    <div class="brand" id="btn-home">
+      <span class="brand-dot"></span><span>Picture This</span>
+    </div>
+    <nav class="steps">
+      <span class="step" data-step="wall"><i>1</i>Room</span><span class="step-sep"></span>
+      <span class="step" data-step="art"><i>2</i>Art</span><span class="step-sep"></span>
+      <span class="step" data-step="gallery"><i>3</i>Gallery</span>
+    </nav>
+    <div class="topbar-actions">
+      <button class="btn btn-sm" id="btn-save-session">Save session</button>
+      <button class="btn btn-sm btn-primary" id="btn-download">Download file</button>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- ---------- WALL ---------- -->
+    <section id="view-wall" class="view pad hidden">
+      <div class="dropzone" id="wall-empty">
+        <svg class="i lg" viewBox="0 0 24 24" style="color:#64748b"><path d="M4 16l4.6-4.6a2 2 0 012.8 0L16 16m-2-2l1.6-1.6a2 2 0 012.8 0L20 14M14 8h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <h3>Upload a photo of your wall</h3>
+        <p>Stand square-on if you can. You will mark out a flat rectangle on the wall and tell us how wide it really is.</p>
+        <label class="btn btn-primary">Choose image<input type="file" id="file-wall" accept="image/*" hidden></label>
+        <button class="link" id="wall-cancel">Go back</button>
+      </div>
+
+      <div class="col hidden" id="wall-editor">
+        <div class="bar">
+          <div>
+            <h2>Define the wall surface</h2>
+            <p class="muted tiny">Drag the four corners onto a flat rectangle &mdash; where the wall meets the floor, ceiling or a corner works well.</p>
+          </div>
+          <div class="toolbar">
+            <label class="field"><span>Top width (cm)</span>
+              <input type="number" id="wall-w" min="1" title="The real distance between the two top corners"></label>
+            <label class="field"><span>Left height (cm)</span>
+              <input type="number" id="wall-h" min="1" title="Guessed from the photo. Type the real height if you know it."></label>
+            <div class="sep"></div>
+            <button class="icon-btn" id="wall-eye" title="Eyedropper: save a colour from the room">
+              <svg class="i" viewBox="0 0 24 24"><path d="M19.4 15.4a2 2 0 00-1-.5l-2.4-.5a6 6 0 00-3.9.5l-.3.2a6 6 0 01-3.9.5l-1.9-.4a2 2 0 00-1.8.6M8 4h8l-1 1v5.2a2 2 0 00.6 1.4l5 5c1.3 1.3.4 3.4-1.4 3.4H4.8c-1.8 0-2.7-2.2-1.4-3.4l5-5A2 2 0 009 10.2V5L8 4z"/></svg>
+            </button>
+            <label class="check"><input type="checkbox" id="wall-grid" checked><span>50cm grid</span></label>
+            <div class="sep"></div>
+            <button class="btn" id="wall-back">Cancel</button>
+            <button class="btn btn-good" id="wall-save">Use this wall</button>
+          </div>
+        </div>
+        <div class="notice hidden" id="wall-eye-note">Click anywhere on the photo &mdash; furniture, paint, a rug &mdash; to save that colour to your palette for mats and frames.</div>
+        <div class="stage-pad" id="wall-cs"></div>
+      </div>
+    </section>
+
+    <!-- ---------- ART STUDIO ---------- -->
+    <section id="view-art" class="view pad hidden">
+      <div class="dropzone" id="art-upload">
+        <svg class="i lg" viewBox="0 0 24 24" style="color:#64748b"><path d="M4 16l4.6-4.6a2 2 0 012.8 0L16 16m-2-2l1.6-1.6a2 2 0 012.8 0L20 14M14 8h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <h3>Add a new artwork</h3>
+        <p>Photograph the painting, print or poster. It does not need to be straight on &mdash; the next step flattens out the angle.</p>
+        <div style="display:flex;gap:12px;align-items:center">
+          <label class="btn btn-primary">Upload photo<input type="file" id="file-art" accept="image/*" hidden></label>
+          <button class="link" id="art-upload-cancel">Cancel</button>
+        </div>
+      </div>
+
+      <div class="col hidden" id="art-crop">
+        <div class="bar">
+          <div><h2>Crop &amp; straighten</h2>
+            <p class="muted tiny">Put the four corners on the corners of the artwork itself.</p></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" id="art-crop-cancel">Cancel</button>
+            <button class="btn" id="art-pick-open">
+              <svg class="i sm" viewBox="0 0 24 24" style="vertical-align:-2px"><path d="M19.4 15.4a2 2 0 00-1-.5l-2.4-.5a6 6 0 00-3.9.5l-.3.2a6 6 0 01-3.9.5l-1.9-.4a2 2 0 00-1.8.6M8 4h8l-1 1v5.2a2 2 0 00.6 1.4l5 5c1.3 1.3.4 3.4-1.4 3.4H4.8c-1.8 0-2.7-2.2-1.4-3.4l5-5A2 2 0 009 10.2V5L8 4z"/></svg>
+              Pick colours
+            </button>
+            <button class="btn btn-primary" id="art-crop-next">Next: frame</button>
+          </div>
+        </div>
+        <div class="stage-pad" id="art-cs"></div>
+      </div>
+
+      <div class="col hidden" id="art-pick">
+        <div class="bar">
+          <div><h2 id="art-pick-title">Pick a colour from your art</h2>
+            <p class="muted tiny">The colour is saved to your palette and applied where you asked for it.</p></div>
+          <button class="btn" id="art-pick-cancel">Cancel</button>
+        </div>
+        <div class="stage-pad" id="art-pick-cs"></div>
+      </div>
+
+      <div class="studio hidden" id="art-frame">
+        <div class="panel">
+          <div>
+            <h3>Art details</h3>
+            <div class="stack">
+              <label><span>Name</span><input type="text" id="art-name"></label>
+              <div class="grid2">
+                <label><span>Real width (cm)</span><input type="number" id="art-w" min="1" step="0.1"></label>
+                <label><span>Real height (cm)</span><input type="number" id="art-h" min="1" step="0.1"></label>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3>Mat (inner)</h3>
+            <div class="stack">
+              <label><span>Mat width &mdash; <b id="mat-w-val">0</b> cm</span>
+                <input type="range" id="mat-w" min="0" max="15" step="0.5"></label>
+              <div>
+                <div class="row-between">
+                  <span class="tiny muted">Mat colour</span>
+                  <button class="link" id="mat-eye" style="font-size:11px">Pick from photo</button>
+                </div>
+                <div class="swatches" id="mat-swatches"></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3>Frame (outer)</h3>
+            <div class="stack">
+              <label><span>Frame width &mdash; <b id="frame-w-val">0</b> cm</span>
+                <input type="range" id="frame-w" min="0" max="10" step="0.5"></label>
+              <div>
+                <div class="row-between">
+                  <span class="tiny muted">Frame colour</span>
+                  <button class="link" id="frame-eye" style="font-size:11px">Pick from photo</button>
+                </div>
+                <div class="swatches" id="frame-swatches"></div>
+              </div>
+            </div>
+          </div>
+          <div class="stack" style="margin-top:auto">
+            <button class="btn btn-good btn-block" id="art-save">Save to collection</button>
+            <button class="link" id="art-frame-back">Back</button>
+          </div>
+        </div>
+        <div class="preview" id="art-preview">
+          <div class="frame-box" id="frame-box">
+            <img id="frame-img" alt="Artwork preview">
+            <div class="frame-cap" id="frame-cap"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- GALLERY ---------- -->
+    <section id="view-gallery" class="view hidden">
+      <aside class="sidebar">
+        <div class="side-head">
+          <h2>My collection</h2>
+          <button class="btn btn-primary btn-sm btn-block" id="btn-new-art">+ Add artwork</button>
+        </div>
+        <div class="side-list" id="inventory-list"></div>
+        <div class="side-foot">
+          <div class="row-between" style="margin:0">
+            <h3>Saved arrangements</h3>
+            <button class="link" id="btn-save-layout" style="font-size:11px;color:#60a5fa">Save current</button>
+          </div>
+          <div class="layout-save hidden" id="layout-save-box">
+            <input type="text" id="layout-name" placeholder="Arrangement name">
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-primary btn-xs" style="flex:1" id="layout-confirm">Save</button>
+              <button class="btn btn-xs" style="flex:1" id="layout-cancel">Cancel</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <select id="layout-select"><option value="">Load arrangement&hellip;</option></select>
+            <button class="btn btn-xs" id="layout-delete" title="Delete the selected arrangement">&times;</button>
+          </div>
+        </div>
+      </aside>
+
+      <div class="wallpane" id="wallpane">
+        <div class="tools">
+          <div class="tool-group">
+            <button class="tool" id="tl-guides">Guides: off</button>
+            <span id="guide-tools" class="hidden" style="display:inline-flex;gap:4px">
+              <button class="tool" id="tl-add">+ Add</button>
+              <button class="tool warn" id="tl-remove">&minus; Remove</button>
+            </span>
+          </div>
+          <div class="tool-group hidden" id="snap-group">
+            <span class="tool-label">Snap</span>
+            <button class="tool snap on" id="tl-snap-center">Centre</button>
+            <button class="tool snap" id="tl-snap-edge">Edge</button>
+          </div>
+          <div class="tool-group">
+            <button class="tool" id="tl-wire">Wall outline</button>
+            <button class="tool" id="tl-export" style="color:#6ee7b7">Export JPEG</button>
+            <button class="tool" id="tl-editwall">Edit wall</button>
+          </div>
+        </div>
+        <div class="hint info hidden" id="gal-hint"></div>
+        <div class="wallstage" id="wallstage">
+          <img class="wallimg" id="wallimg" alt="Your wall">
+          <svg class="overlay-svg" id="guide-svg"></svg>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+<div id="busy" class="hidden"><span id="busy-text">Working&hellip;</span></div>
+
+<script>
+(function () {
+'use strict';
+
+/* ==========================================================================
+   Picture This - a single-file art hanging planner.
+   Everything lives here: perspective maths, the three editors, and saving.
+   ========================================================================== */
+
+const $  = (sel, root) => (root || document).querySelector(sel);
+const $$ = (sel, root) => Array.prototype.slice.call((root || document).querySelectorAll(sel));
+
+/* --------------------------------------------------------------------------
+   Perspective maths
+   A homography maps one quadrilateral onto another. We use it three ways:
+   flattening a photographed picture, projecting art onto the wall plane, and
+   turning wall coordinates back into photo pixels.
+   -------------------------------------------------------------------------- */
+
+// Gaussian elimination with partial pivoting.
+function solveLinearSystem(A, B) {
+  const n = A.length;
+  for (let i = 0; i < n; i++) {
+    let maxEl = Math.abs(A[i][i]), maxRow = i;
+    for (let k = i + 1; k < n; k++) {
+      if (Math.abs(A[k][i]) > maxEl) { maxEl = Math.abs(A[k][i]); maxRow = k; }
+    }
+    for (let k = i; k < n; k++) {
+      const tmp = A[maxRow][k]; A[maxRow][k] = A[i][k]; A[i][k] = tmp;
+    }
+    const tmp = B[maxRow]; B[maxRow] = B[i]; B[i] = tmp;
+    for (let k = i + 1; k < n; k++) {
+      const c = -A[k][i] / A[i][i];
+      for (let j = i; j < n; j++) A[k][j] = (i === j) ? 0 : A[k][j] + c * A[i][j];
+      B[k] += c * B[i];
+    }
+  }
+  const x = new Array(n).fill(0);
+  for (let i = n - 1; i >= 0; i--) {
+    let sum = 0;
+    for (let k = i + 1; k < n; k++) sum += A[i][k] * x[k];
+    x[i] = (B[i] - sum) / A[i][i];
+  }
+  return x;
+}
+
+function mult3x3(m1, m2) {
+  const res = new Array(9).fill(0);
+  for (let r = 0; r < 3; r++)
+    for (let c = 0; c < 3; c++)
+      for (let k = 0; k < 3; k++) res[r * 3 + c] += m1[r * 3 + k] * m2[k * 3 + c];
+  return res;
+}
+
+// Normalised DLT: shift and scale both point sets before solving, which keeps
+// the linear system well conditioned, then undo the normalisation.
+function computeHomography(srcPoints, dstPoints) {
+  const normalize = (points) => {
+    let cx = 0, cy = 0;
+    points.forEach(p => { cx += p.x; cy += p.y; });
+    cx /= points.length; cy /= points.length;
+    let distSum = 0;
+    points.forEach(p => { distSum += Math.hypot(p.x - cx, p.y - cy); });
+    const s = (Math.sqrt(2) * points.length) / distSum;
+    return {
+      points: points.map(p => ({ x: s * (p.x - cx), y: s * (p.y - cy) })),
+      T: [s, 0, -s * cx, 0, s, -s * cy, 0, 0, 1]
+    };
+  };
+
+  const src = normalize(srcPoints), dst = normalize(dstPoints);
+  const A = [], B = [];
+  for (let i = 0; i < 4; i++) {
+    const s = src.points[i], d = dst.points[i];
+    A.push([s.x, s.y, 1, 0, 0, 0, -s.x * d.x, -s.y * d.x]);
+    A.push([0, 0, 0, s.x, s.y, 1, -s.x * d.y, -s.y * d.y]);
+    B.push(d.x); B.push(d.y);
+  }
+  const h = solveLinearSystem(A, B);
+  h.push(1);
+
+  // H = inv(T_dst) * H_norm * T_src ; inverting a similarity matrix is trivial.
+  const invTd = [
+    1 / dst.T[0], 0, -dst.T[2] / dst.T[0],
+    0, 1 / dst.T[4], -dst.T[5] / dst.T[4],
+    0, 0, 1
+  ];
+  const H = mult3x3(invTd, mult3x3(h, src.T));
+  if (Math.abs(H[8]) > 1e-8) for (let i = 0; i < 9; i++) H[i] /= H[8];
+  return H;
+}
+
+function transformPoint(x, y, H) {
+  const d = H[6] * x + H[7] * y + H[8];
+  return { x: (H[0] * x + H[1] * y + H[2]) / d, y: (H[3] * x + H[4] * y + H[5]) / d };
+}
+
+// CSS matrix3d is column-major, and the homography only touches x/y.
+function getCSSMatrix3d(srcWidth, srcHeight, dstPoints) {
+  const H = computeHomography(
+    [{ x: 0, y: 0 }, { x: srcWidth, y: 0 }, { x: srcWidth, y: srcHeight }, { x: 0, y: srcHeight }],
+    dstPoints
+  );
+  return 'matrix3d(' + [
+    H[0], H[3], 0, H[6],
+    H[1], H[4], 0, H[7],
+    0, 0, 1, 0,
+    H[2], H[5], 0, H[8]
+  ].join(',') + ')';
+}
+
+const dist = (a, b) => Math.hypot(b.x - a.x, b.y - a.y);
+const UNIT_SQUARE = [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }, { x: 0, y: 1 }];
+
+/* --------------------------------------------------------------------------
+   Small helpers
+   -------------------------------------------------------------------------- */
+
+let toastTimer = null;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function busy(text) {
+  $('#busy-text').textContent = text;
+  $('#busy').classList.remove('hidden');
+  // Let the browser paint the overlay before we block on heavy pixel work.
+  return new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+}
+const unbusy = () => $('#busy').classList.add('hidden');
+
+const readAs = (file, how) => new Promise((resolve, reject) => {
+  const fr = new FileReader();
+  fr.onload = () => resolve(fr.result);
+  fr.onerror = () => reject(fr.error);
+  fr[how](file);
+});
+
+const loadImage = (src) => new Promise((resolve, reject) => {
+  const img = new Image();
+  img.onload = () => resolve(img);
+  img.onerror = () => reject(new Error('Could not read that image'));
+  img.src = src;
+});
+
+const clone = (o) => JSON.parse(JSON.stringify(o));
+const num = (v, fallback) => { const n = parseFloat(v); return isFinite(n) ? n : fallback; };
+const downloadURL = (href, name) => {
+  const a = document.createElement('a');
+  a.href = href; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+};
+
+// Total footprint of a piece on the wall, mat and frame included.
+function outerSize(art) {
+  const pad = (art.frame.frameWidthCm + art.frame.matWidthCm) * 2;
+  return { w: art.realWidthCm + pad, h: art.realHeightCm + pad };
+}
+const wallHeightCm = (wall) => wall.realHeightCm || (wall.realWidthCm / wall.aspectRatio);
+
+/* --------------------------------------------------------------------------
+   Project state and persistence
+   -------------------------------------------------------------------------- */
+
+const STORAGE_KEY = 'art_arranger_project';
+const DEFAULT_PALETTE = ['#f1f5f9', '#1e293b', '#ffffff', '#000000'];
+
+function blankProject() {
+  return {
+    wall: null, inventory: [], layout: [], savedLayouts: [],
+    palette: DEFAULT_PALETTE.slice(), guides: { h: [], v: [] }
+  };
+}
+
+// Accepts projects written by any earlier version; missing fields get defaults.
+function normalizeProject(raw) {
+  if (!raw || typeof raw !== 'object') throw new Error('not a project');
+  const p = blankProject();
+  p.wall = raw.wall || null;
+  p.inventory = Array.isArray(raw.inventory) ? raw.inventory : [];
+  p.layout = Array.isArray(raw.layout) ? raw.layout : [];
+  p.savedLayouts = Array.isArray(raw.savedLayouts) ? raw.savedLayouts : [];
+  if (Array.isArray(raw.palette) && raw.palette.length) p.palette = raw.palette;
+  if (raw.guides) {
+    p.guides.h = Array.isArray(raw.guides.h) ? raw.guides.h : [];
+    p.guides.v = Array.isArray(raw.guides.v) ? raw.guides.v : [];
+  }
+  if (p.wall && !p.wall.realHeightCm && p.wall.aspectRatio)
+    p.wall.realHeightCm = p.wall.realWidthCm / p.wall.aspectRatio;
+  return p;
+}
+
+let project = blankProject();
+
+function stateSignature() {
+  const w = project.wall;
+  return JSON.stringify({
+    w: w ? [w.id, w.corners, w.realWidthCm, w.realHeightCm, w.imageSrc.length] : null,
+    i: project.inventory.map(a => [a.id, a.name, a.realWidthCm, a.realHeightCm, a.frame, a.imageSrc.length]),
+    l: project.layout,
+    s: project.savedLayouts,
+    g: project.guides
+  });
+}
+let lastSavedSig = stateSignature();
+const markSaved = () => { lastSavedSig = stateSignature(); };
+
+function addToPalette(hex) {
+  if (!project.palette.includes(hex)) {
+    project.palette = [hex].concat(project.palette).slice(0, 12);
   }
 }
+
+function saveSession() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(project));
+    markSaved();
+    toast('Saved to this browser. You can close the tab and come back.');
+  } catch (e) {
+    alert('This project is too big for browser storage (photos take a lot of room).\n\n' +
+          'Use "Download file" instead - that always works.');
+  }
+}
+
+function loadSession() {
+  const data = localStorage.getItem(STORAGE_KEY);
+  if (!data) { alert('No saved session found in this browser.'); return; }
+  try {
+    project = normalizeProject(JSON.parse(data));
+  } catch (e) {
+    alert('The saved session looks corrupted, sorry.');
+    return;
+  }
+  openProject();
+}
+
+function exportProject() {
+  const blob = new Blob([JSON.stringify(project)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  downloadURL(url, 'picture-this-project.json');
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  markSaved();
+  toast('Project downloaded.');
+}
+
+async function importProject(file) {
+  try {
+    project = normalizeProject(JSON.parse(await readAs(file, 'readAsText')));
+  } catch (e) {
+    alert("That file doesn't look like a Picture This project.");
+    return;
+  }
+  openProject();
+}
+
+// Land wherever makes sense for what the project already contains.
+function openProject() {
+  markSaved();
+  if (project.wall) { Gallery.enter(); }
+  else { Wall.enter(null); }
+}
+
+/* --------------------------------------------------------------------------
+   Navigation
+   -------------------------------------------------------------------------- */
+
+const VIEWS = { wall: '#view-wall', art: '#view-art', gallery: '#view-gallery' };
+let currentView = null;
+
+function showDashboard() {
+  currentView = null;
+  $('#screen-dashboard').classList.remove('hidden');
+  $('#screen-app').classList.add('hidden');
+}
+
+function showView(name) {
+  currentView = name;
+  $('#screen-dashboard').classList.add('hidden');
+  $('#screen-app').classList.remove('hidden');
+  Object.keys(VIEWS).forEach(k => $(VIEWS[k]).classList.toggle('hidden', k !== name));
+  $$('.step').forEach(s => s.classList.toggle('on', s.dataset.step === name));
+  if (name === 'gallery') Gallery.onShown();
+}
+
+/* --------------------------------------------------------------------------
+   Corner selector
+   A photo with four draggable corner handles, used by both the wall step and
+   the art crop step. Corner coordinates are percentages of the photo, so they
+   survive resizing and are meaningful at any display scale.
+   -------------------------------------------------------------------------- */
+
+const HANDLE_LABELS = ['TL', 'TR', 'BR', 'BL'];
+const HANDLE_COLORS = ['#ef4444', '#22c55e', '#3b82f6', '#eab308'];
+
+function CornerSelector(host, opts) {
+  opts = opts || {};
+  const corners = (opts.corners || [
+    { x: 20, y: 20 }, { x: 80, y: 20 }, { x: 80, y: 80 }, { x: 20, y: 80 }
+  ]).map(p => ({ x: p.x, y: p.y }));
+
+  host.innerHTML =
+    '<div class="cs">' +
+      '<div class="cs-label"><h3></h3><p></p></div>' +
+      '<div class="cs-eyetag hidden">Eyedropper on &mdash; click the photo</div>' +
+      '<div class="cs-stage">' +
+        '<img class="cs-img" alt="">' +
+        '<svg class="cs-svg cs-extra" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>' +
+        '<svg class="cs-svg cs-poly" viewBox="0 0 100 100" preserveAspectRatio="none">' +
+          '<polygon vector-effect="non-scaling-stroke"/></svg>' +
+      '</div>' +
+    '</div>';
+
+  const stage = $('.cs-stage', host);
+  const img   = $('.cs-img', host);
+  const poly  = $('.cs-poly polygon', host);
+  const polySvg = $('.cs-poly', host);
+  const extra = $('.cs-extra', host);
+  const eyetag = $('.cs-eyetag', host);
+
+  let eyedropper = !!opts.eyedropper;
+  let sampler = null;   // lazily built canvas for reading pixel colours
+
+  const handles = HANDLE_LABELS.map((label, i) => {
+    const h = document.createElement('div');
+    h.className = 'cs-handle';
+    h.innerHTML = '<span class="knob" style="background:' + HANDLE_COLORS[i] + '">' + label + '</span>' +
+                  '<span class="dot" style="border-color:' + HANDLE_COLORS[i] + '"></span>';
+    stage.appendChild(h);
+    h.addEventListener('pointerdown', (e) => {
+      if (eyedropper) return;
+      e.preventDefault(); e.stopPropagation();
+      h.setPointerCapture(e.pointerId);
+      h.classList.add('drag');
+    });
+    h.addEventListener('pointermove', (e) => {
+      if (!h.classList.contains('drag')) return;
+      const r = stage.getBoundingClientRect();
+      corners[i] = {
+        x: Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100)),
+        y: Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100))
+      };
+      paint();
+      if (opts.onChange) opts.onChange(corners);
+    });
+    const stop = (e) => {
+      if (!h.classList.contains('drag')) return;
+      h.classList.remove('drag');
+      if (h.hasPointerCapture(e.pointerId)) h.releasePointerCapture(e.pointerId);
+      if (opts.onChangeEnd) opts.onChangeEnd(corners);
+    };
+    h.addEventListener('pointerup', stop);
+    h.addEventListener('pointercancel', stop);
+    return h;
+  });
+
+  stage.addEventListener('click', (e) => {
+    if (!eyedropper || !opts.onColorPick) return;
+    const hex = samplePixel(e.clientX, e.clientY);
+    if (hex) opts.onColorPick(hex);
+  });
+
+  function samplePixel(clientX, clientY) {
+    if (!img.naturalWidth) return null;
+    if (!sampler) {
+      sampler = document.createElement('canvas');
+      sampler.width = img.naturalWidth;
+      sampler.height = img.naturalHeight;
+      sampler.getContext('2d').drawImage(img, 0, 0);
+    }
+    const r = stage.getBoundingClientRect();
+    const px = Math.floor(((clientX - r.left) / r.width) * img.naturalWidth);
+    const py = Math.floor(((clientY - r.top) / r.height) * img.naturalHeight);
+    if (px < 0 || py < 0 || px >= sampler.width || py >= sampler.height) return null;
+    const d = sampler.getContext('2d').getImageData(px, py, 1, 1).data;
+    const hex = (n) => n.toString(16).padStart(2, '0');
+    return '#' + hex(d[0]) + hex(d[1]) + hex(d[2]);
+  }
+
+  function paint() {
+    poly.setAttribute('points', corners.map(p => p.x + ',' + p.y).join(' '));
+    handles.forEach((h, i) => {
+      h.style.left = corners[i].x + '%';
+      h.style.top = corners[i].y + '%';
+    });
+  }
+
+  function setEyedropper(on) {
+    eyedropper = on;
+    stage.classList.toggle('pick', on);
+    eyetag.classList.toggle('hidden', !on);
+    polySvg.classList.toggle('hidden', on);
+    handles.forEach(h => h.classList.toggle('hidden', on));
+  }
+
+  const api = {
+    corners,
+    setImage(src) { sampler = null; img.src = src; },
+    setLabel(title, instruction) {
+      $('.cs-label h3', host).textContent = title || 'Calibration';
+      $('.cs-label p', host).textContent = instruction || 'Drag the four corners.';
+    },
+    setOverlay(markup) { extra.innerHTML = markup || ''; },
+    setCorners(next) {
+      next.forEach((p, i) => { corners[i] = { x: p.x, y: p.y }; });
+      paint();
+    },
+    setEyedropper,
+    getCorners: () => corners.map(p => ({ x: p.x, y: p.y }))
+  };
+
+  api.setImage(opts.imageSrc || '');
+  api.setLabel(opts.label, opts.instruction);
+  setEyedropper(eyedropper);
+  paint();
+  return api;
+}
+
+/* --------------------------------------------------------------------------
+   Step 1 - the wall
+   Mark a flat rectangle on the photo and say how big it really is. That pair
+   of facts is what lets every picture be drawn at true scale later on.
+   -------------------------------------------------------------------------- */
+
+const Wall = (function () {
+  let imageSrc = null;
+  let corners = [{ x: 20, y: 20 }, { x: 80, y: 20 }, { x: 80, y: 80 }, { x: 20, y: 80 }];
+  let manualHeight = false;
+  let cs = null;
+
+  const wIn = $('#wall-w'), hIn = $('#wall-h'), gridBox = $('#wall-grid');
+
+  function enter(existing) {
+    if (existing) {
+      imageSrc = existing.imageSrc;
+      corners = clone(existing.corners);
+      wIn.value = existing.realWidthCm;
+      hIn.value = Math.round(wallHeightCm(existing));
+      manualHeight = true;
+    } else {
+      imageSrc = null;
+      corners = [{ x: 20, y: 20 }, { x: 80, y: 20 }, { x: 80, y: 80 }, { x: 20, y: 80 }];
+      wIn.value = 200; hIn.value = 200;
+      manualHeight = false;
+    }
+    hIn.classList.toggle('guess', !manualHeight);
+    $('#wall-empty').classList.toggle('hidden', !!imageSrc);
+    $('#wall-editor').classList.toggle('hidden', !imageSrc);
+    if (imageSrc) mountEditor();
+    showView('wall');
+  }
+
+  function mountEditor() {
+    $('#wall-empty').classList.add('hidden');
+    $('#wall-editor').classList.remove('hidden');
+    cs = CornerSelector($('#wall-cs'), {
+      imageSrc: imageSrc,
+      corners: corners,
+      label: 'Wall surface',
+      instruction: 'Drag the corners to match a real rectangle on the wall',
+      onChange: (c) => { corners = c; guessHeight(); drawGrid(); },
+      onColorPick: (hex) => {
+        addToPalette(hex);
+        setEyedropper(false);
+        toast('Saved ' + hex + ' to your palette.');
+      }
+    });
+    guessHeight();
+    drawGrid();
+  }
+
+  // The apparent shape of the marked rectangle tells us its true proportions,
+  // so once the user types a width we can offer a height.
+  function guessHeight() {
+    if (manualHeight) return;
+    const avgW = (dist(corners[0], corners[1]) + dist(corners[3], corners[2])) / 2;
+    const avgH = (dist(corners[0], corners[3]) + dist(corners[1], corners[2])) / 2;
+    const w = num(wIn.value, 0);
+    if (avgH > 0 && avgW > 0 && w > 0) hIn.value = Math.round(w / (avgW / avgH));
+  }
+
+  // A 50cm grid drawn in wall space - a quick sanity check that the corners
+  // are actually on a flat plane.
+  function drawGrid() {
+    if (!cs) return;
+    if (!gridBox.checked) { cs.setOverlay(''); return; }
+    const H = computeHomography(UNIT_SQUARE, corners);
+    const wVal = num(wIn.value, 200), hVal = num(hIn.value, 200);
+    const cell = 50;
+    let markup = '';
+    const line = (a, b) => '<line x1="' + a.x + '" y1="' + a.y + '" x2="' + b.x + '" y2="' + b.y +
+      '" stroke="rgba(255,255,255,.4)" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+    for (let i = 0; i * cell <= wVal; i++) {
+      const u = (i * cell) / wVal;
+      if (u > 1.001) break;
+      markup += line(transformPoint(u, 0, H), transformPoint(u, 1, H));
+    }
+    for (let i = 0; i * cell <= hVal; i++) {
+      const v = (i * cell) / hVal;
+      if (v > 1.001) break;
+      markup += line(transformPoint(0, v, H), transformPoint(1, v, H));
+    }
+    cs.setOverlay(markup);
+  }
+
+  let eyeOn = false;
+  function setEyedropper(on) {
+    eyeOn = on;
+    $('#wall-eye').classList.toggle('on', on);
+    $('#wall-eye-note').classList.toggle('hidden', !on);
+    if (cs) {
+      cs.setEyedropper(on);
+      cs.setLabel(on ? 'Pick a colour' : 'Wall surface',
+        on ? 'Click anywhere to save that colour' : 'Drag the corners to match a real rectangle on the wall');
+    }
+  }
+
+  function save() {
+    const w = num(wIn.value, 0), h = num(hIn.value, 0);
+    if (w <= 0) { alert('Please enter the real width of the marked area, in centimetres.'); return; }
+    if (h <= 0) { alert('Please enter the real height of the marked area, in centimetres.'); return; }
+    const keepLayout = !!project.wall;
+    project.wall = {
+      id: (project.wall && project.wall.id) || String(Date.now()),
+      imageSrc: imageSrc,
+      corners: clone(corners),
+      realWidthCm: w,
+      realHeightCm: h,
+      aspectRatio: w / h
+    };
+    if (!keepLayout) { project.layout = []; project.guides = { h: [], v: [] }; }
+    Gallery.enter();
+  }
+
+  function leave() {
+    if (project.wall) Gallery.enter();
+    else showDashboard();
+  }
+
+  /* wiring */
+  $('#file-wall').addEventListener('change', async (e) => {
+    if (!e.target.files || !e.target.files[0]) return;
+    imageSrc = await readAs(e.target.files[0], 'readAsDataURL');
+    e.target.value = '';
+    manualHeight = false;
+    hIn.classList.add('guess');
+    mountEditor();
+  });
+  wIn.addEventListener('input', () => { guessHeight(); drawGrid(); });
+  hIn.addEventListener('input', () => {
+    manualHeight = true;
+    hIn.classList.remove('guess');
+    drawGrid();
+  });
+  gridBox.addEventListener('change', drawGrid);
+  $('#wall-eye').addEventListener('click', () => setEyedropper(!eyeOn));
+  $('#wall-save').addEventListener('click', save);
+  $('#wall-back').addEventListener('click', leave);
+  $('#wall-cancel').addEventListener('click', leave);
+
+  return { enter: enter };
+})();
+
+/* --------------------------------------------------------------------------
+   Step 2 - the art studio
+   Flatten a photo of a picture, give it real dimensions, then dress it with a
+   mat and a frame. The result is stored as a plain rectangular texture.
+   -------------------------------------------------------------------------- */
+
+const Studio = (function () {
+  let editingId = null;
+  let sourceImage = null;      // the original photo, kept for the eyedropper
+  let processed = null;        // flattened texture that gets hung on the wall
+  let corners = [{ x: 10, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 90 }, { x: 10, y: 90 }];
+  let frameCfg = { matColor: '#f1f5f9', matWidthCm: 0, frameColor: '#1e293b', frameWidthCm: 0 };
+  let cropCS = null, pickCS = null;
+  let pickTarget = null;       // 'mat' | 'frame' | null (null = palette only)
+  let returnStep = 'crop';
+
+  const panes = ['#art-upload', '#art-crop', '#art-pick', '#art-frame'];
+  function step(which) {
+    panes.forEach(p => $(p).classList.toggle('hidden', p !== which));
+    if (which === '#art-frame') requestAnimationFrame(drawPreview);
+  }
+
+  function enter(artId) {
+    editingId = artId || null;
+    if (editingId) {
+      const art = project.inventory.find(a => a.id === editingId);
+      if (!art) { editingId = null; return enter(null); }
+      sourceImage = null;
+      processed = art.imageSrc;
+      frameCfg = clone(art.frame);
+      $('#art-name').value = art.name;
+      $('#art-w').value = art.realWidthCm;
+      $('#art-h').value = art.realHeightCm;
+      syncFrameControls();
+      step('#art-frame');
+    } else {
+      sourceImage = null; processed = null;
+      corners = [{ x: 10, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 90 }, { x: 10, y: 90 }];
+      frameCfg = { matColor: '#f1f5f9', matWidthCm: 0, frameColor: '#1e293b', frameWidthCm: 0 };
+      $('#art-name').value = 'Untitled art';
+      $('#art-w').value = 50; $('#art-h').value = 50;
+      syncFrameControls();
+      step('#art-upload');
+    }
+    showView('art');
+  }
+
+  /* ---- crop ---- */
+
+  function mountCrop() {
+    cropCS = CornerSelector($('#art-cs'), {
+      imageSrc: sourceImage,
+      corners: corners,
+      label: 'Crop the artwork',
+      instruction: 'Line the corners up with the edges of the picture',
+      onChange: (c) => { corners = c; }
+    });
+    step('#art-crop');
+  }
+
+  // Inverse-map every destination pixel back into the photo and sample it with
+  // bilinear interpolation. Slower than a GPU would be, but exact and portable.
+  async function processCrop() {
+    if (!sourceImage) return;
+    await busy('Straightening your artwork…');
+    try {
+      const img = await loadImage(sourceImage);
+      const topDist  = dist(corners[0], corners[1]);
+      const sideDist = dist(corners[0], corners[3]);
+      const aspect = topDist / sideDist;
+      if (!isFinite(aspect) || aspect <= 0) { alert('Those corners are too close together.'); return; }
+
+      const w = 1000, h = Math.max(1, Math.round(w / aspect));
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+
+      const srcPts = corners.map(p => ({ x: p.x * img.width / 100, y: p.y * img.height / 100 }));
+      const dstPts = [{ x: 0, y: 0 }, { x: w, y: 0 }, { x: w, y: h }, { x: 0, y: h }];
+      const H = computeHomography(dstPts, srcPts);   // destination -> source
+
+      const tmp = document.createElement('canvas');
+      tmp.width = img.width; tmp.height = img.height;
+      tmp.getContext('2d').drawImage(img, 0, 0);
+      const srcData = tmp.getContext('2d').getImageData(0, 0, img.width, img.height).data;
+      const srcW = img.width, srcH = img.height;
+
+      const out = ctx.createImageData(w, h);
+      const data = out.data;
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const denom = H[6] * x + H[7] * y + H[8];
+          const u = (H[0] * x + H[1] * y + H[2]) / denom;
+          const v = (H[3] * x + H[4] * y + H[5]) / denom;
+          if (u < 0 || u >= srcW - 1 || v < 0 || v >= srcH - 1) continue;
+          const u0 = Math.floor(u), v0 = Math.floor(v);
+          const dx = u - u0, dy = v - v0;
+          const i00 = (v0 * srcW + u0) * 4, i10 = i00 + 4;
+          const i01 = ((v0 + 1) * srcW + u0) * 4, i11 = i01 + 4;
+          const idx = (y * w + x) * 4;
+          for (let k = 0; k < 3; k++) {
+            data[idx + k] =
+              srcData[i00 + k] * (1 - dx) * (1 - dy) + srcData[i10 + k] * dx * (1 - dy) +
+              srcData[i01 + k] * (1 - dx) * dy       + srcData[i11 + k] * dx * dy;
+          }
+          data[idx + 3] = 255;
+        }
+      }
+      ctx.putImageData(out, 0, 0);
+      processed = canvas.toDataURL('image/jpeg', 0.92);
+
+      const wCm = num($('#art-w').value, 50);
+      $('#art-h').value = Number((wCm / aspect).toFixed(1));
+      step('#art-frame');
+    } catch (e) {
+      console.error(e);
+      alert('Something went wrong flattening that photo.');
+    } finally {
+      unbusy();
+    }
+  }
+
+  /* ---- colour picking ---- */
+
+  function openPicker(target) {
+    const src = sourceImage || processed;
+    if (!src) { toast('No photo to pick a colour from.'); return; }
+    pickTarget = target;
+    returnStep = $('#art-frame').classList.contains('hidden') ? '#art-crop' : '#art-frame';
+    $('#art-pick-title').textContent =
+      target ? 'Pick a ' + target + ' colour' : 'Pick a colour from your art';
+    pickCS = CornerSelector($('#art-pick-cs'), {
+      imageSrc: src,
+      eyedropper: true,
+      label: 'Colour picker',
+      instruction: 'Click anywhere on the photo',
+      onColorPick: (hex) => {
+        if (pickTarget === 'mat') frameCfg.matColor = hex;
+        if (pickTarget === 'frame') frameCfg.frameColor = hex;
+        addToPalette(hex);
+        syncFrameControls();
+        toast('Saved ' + hex + ' to your palette.');
+        step(returnStep);
+      }
+    });
+    step('#art-pick');
+  }
+
+  /* ---- frame controls & preview ---- */
+
+  function swatchRow(host, current, onPick) {
+    host.innerHTML = '';
+    project.palette.forEach(c => {
+      const b = document.createElement('button');
+      b.className = 'swatch' + (c.toLowerCase() === current.toLowerCase() ? ' on' : '');
+      b.style.background = c;
+      b.title = c;
+      b.addEventListener('click', () => onPick(c));
+      host.appendChild(b);
+    });
+    const inp = document.createElement('input');
+    inp.type = 'color'; inp.value = current;
+    inp.addEventListener('input', () => onPick(inp.value));
+    host.appendChild(inp);
+  }
+
+  function syncFrameControls() {
+    $('#mat-w').value = frameCfg.matWidthCm;
+    $('#mat-w-val').textContent = frameCfg.matWidthCm;
+    $('#frame-w').value = frameCfg.frameWidthCm;
+    $('#frame-w-val').textContent = frameCfg.frameWidthCm;
+    swatchRow($('#mat-swatches'), frameCfg.matColor, (c) => {
+      frameCfg.matColor = c; syncFrameControls();
+    });
+    swatchRow($('#frame-swatches'), frameCfg.frameColor, (c) => {
+      frameCfg.frameColor = c; syncFrameControls();
+    });
+    $('#art-save').textContent = editingId ? 'Update artwork' : 'Save to collection';
+    drawPreview();
+  }
+
+  function drawPreview() {
+    if ($('#art-frame').classList.contains('hidden')) return;
+    const wCm = num($('#art-w').value, 50), hCm = num($('#art-h').value, 50);
+    const totalW = wCm + (frameCfg.frameWidthCm + frameCfg.matWidthCm) * 2;
+    const totalH = hCm + (frameCfg.frameWidthCm + frameCfg.matWidthCm) * 2;
+    const host = $('#art-preview');
+    const scale = Math.max(0.4, Math.min(6,
+      (host.clientWidth - 90) / Math.max(1, totalW),
+      (host.clientHeight - 110) / Math.max(1, totalH)));
+
+    const box = $('#frame-box');
+    box.style.width = (wCm * scale) + 'px';
+    box.style.height = (hCm * scale) + 'px';
+    box.style.border = (frameCfg.frameWidthCm * scale) + 'px solid ' + frameCfg.frameColor;
+    box.style.padding = (frameCfg.matWidthCm * scale) + 'px';
+    box.style.background = frameCfg.matColor;
+    if (processed && $('#frame-img').getAttribute('src') !== processed) $('#frame-img').src = processed;
+    $('#frame-cap').textContent = 'Hangs as ' + totalW.toFixed(1) + ' x ' + totalH.toFixed(1) + ' cm';
+  }
+
+  function save() {
+    if (!processed) return;
+    const wCm = num($('#art-w').value, 0), hCm = num($('#art-h').value, 0);
+    if (wCm <= 0 || hCm <= 0) { alert('Give the artwork a real width and height in centimetres.'); return; }
+    const art = {
+      id: editingId || String(Date.now()),
+      name: $('#art-name').value.trim() || 'Untitled art',
+      imageSrc: processed,
+      realWidthCm: wCm,
+      realHeightCm: hCm,
+      frame: clone(frameCfg)
+    };
+    const idx = project.inventory.findIndex(a => a.id === art.id);
+    if (idx >= 0) project.inventory[idx] = art; else project.inventory.push(art);
+    toast(idx >= 0 ? 'Artwork updated.' : 'Added to your collection.');
+    Gallery.enter();
+  }
+
+  /* wiring */
+  $('#file-art').addEventListener('change', async (e) => {
+    if (!e.target.files || !e.target.files[0]) return;
+    sourceImage = await readAs(e.target.files[0], 'readAsDataURL');
+    e.target.value = '';
+    corners = [{ x: 10, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 90 }, { x: 10, y: 90 }];
+    mountCrop();
+  });
+  $('#art-upload-cancel').addEventListener('click', () => Gallery.enter());
+  $('#art-crop-cancel').addEventListener('click', () => Gallery.enter());
+  $('#art-crop-next').addEventListener('click', processCrop);
+  $('#art-pick-open').addEventListener('click', () => openPicker(null));
+  $('#art-pick-cancel').addEventListener('click', () => step(returnStep));
+  $('#mat-eye').addEventListener('click', () => openPicker('mat'));
+  $('#frame-eye').addEventListener('click', () => openPicker('frame'));
+  $('#mat-w').addEventListener('input', (e) => {
+    frameCfg.matWidthCm = num(e.target.value, 0);
+    $('#mat-w-val').textContent = frameCfg.matWidthCm; drawPreview();
+  });
+  $('#frame-w').addEventListener('input', (e) => {
+    frameCfg.frameWidthCm = num(e.target.value, 0);
+    $('#frame-w-val').textContent = frameCfg.frameWidthCm; drawPreview();
+  });
+  $('#art-w').addEventListener('input', drawPreview);
+  $('#art-h').addEventListener('input', drawPreview);
+  $('#art-save').addEventListener('click', save);
+  $('#art-frame-back').addEventListener('click', () => {
+    if (editingId || !sourceImage) Gallery.enter(); else mountCrop();
+  });
+  window.addEventListener('resize', drawPreview);
+
+  return { enter: enter };
+})();
+
+/* --------------------------------------------------------------------------
+   Step 3 - the gallery wall
+   Everything here works in "wall coordinates": 0..1 across the rectangle you
+   marked in step 1. A homography turns those into photo pixels, and a CSS
+   matrix3d makes each picture sit on the wall at the right angle and size.
+   -------------------------------------------------------------------------- */
+
+const Gallery = (function () {
+  const pane = $('#wallpane'), stageEl = $('#wallstage'), wallImg = $('#wallimg'), guideSvg = $('#guide-svg');
+
+  let mode = 'MOVE_ART';               // MOVE_ART | ADD_GUIDE | REMOVE_GUIDE
+  let snapMode = 'CENTER';             // CENTER | EDGE
+  let showGuides = false, showWire = false;
+  let selectedId = null;
+  let dragging = false, dragOffset = { x: 0, y: 0 };
+  let rect = { left: 0, top: 0, width: 0, height: 0 };
+  const nodes = new Map();             // placement id -> DOM
+  let wireEl = null;
+
+  function enter() {
+    if (!project.wall) { Wall.enter(null); return; }
+    if (wallImg.getAttribute('src') !== project.wall.imageSrc) wallImg.src = project.wall.imageSrc;
+    selectedId = null;
+    renderInventory();
+    renderLayoutList();
+    showView('gallery');
+  }
+
+  function onShown() { measure(); }
+
+  /* ---- geometry ---- */
+
+  // Where the photo actually lands inside its letterboxed container.
+  function measure() {
+    const cw = stageEl.clientWidth, ch = stageEl.clientHeight;
+    const iw = wallImg.naturalWidth, ih = wallImg.naturalHeight;
+    if (!cw || !ch || !iw || !ih) return;
+    const containerRatio = cw / ch, imageRatio = iw / ih;
+    if (containerRatio > imageRatio) {
+      const w = ch * imageRatio;
+      rect = { width: w, height: ch, top: 0, left: (cw - w) / 2 };
+    } else {
+      const h = cw / imageRatio;
+      rect = { width: cw, height: h, left: 0, top: (ch - h) / 2 };
+    }
+    redraw();
+  }
+
+  const pctToPx = (p) => ({
+    x: rect.left + (p.x / 100) * rect.width,
+    y: rect.top + (p.y / 100) * rect.height
+  });
+
+  // Screen point -> wall coordinates (0..1 across the marked rectangle).
+  function toWallCoords(clientX, clientY) {
+    if (!rect.width || !rect.height) return null;
+    const r = stageEl.getBoundingClientRect();
+    const imgX = ((clientX - r.left) - rect.left) / rect.width * 100;
+    const imgY = ((clientY - r.top) - rect.top) / rect.height * 100;
+    return transformPoint(imgX, imgY, computeHomography(project.wall.corners, UNIT_SQUARE));
+  }
+
+  function unitSizeOf(art) {
+    const o = outerSize(art);
+    return { w: o.w / project.wall.realWidthCm, h: o.h / wallHeightCm(project.wall) };
+  }
+
+  /* ---- drawing ---- */
+
+  function redraw() { syncPlacements(); drawGuides(); drawWire(); }
+
+  function syncPlacements() {
+    if (!project.wall) return;
+    const H = computeHomography(UNIT_SQUARE, project.wall.corners);
+    const seen = new Set();
+
+    project.layout.forEach(item => {
+      const art = project.inventory.find(a => a.id === item.artId);
+      if (!art) return;
+      seen.add(item.id);
+
+      let n = nodes.get(item.id);
+      if (!n) {
+        const root = document.createElement('div');
+        root.className = 'placed';
+        root.innerHTML =
+          '<div class="inner"><img alt=""></div>' +
+          '<div class="placed-acts hidden">' +
+            '<button class="round edit" title="Edit this artwork"><svg class="i sm" viewBox="0 0 24 24">' +
+              '<path d="M15.2 5.2l3.6 3.6M16.7 3.2a2.5 2.5 0 113.6 3.6L6.5 21H3v-3.6L16.7 3.2z"/></svg></button>' +
+            '<button class="round del" title="Take it off the wall"><svg class="i sm" viewBox="0 0 24 24">' +
+              '<path d="M6 18L18 6M6 6l12 12"/></svg></button>' +
+          '</div>';
+        n = { root: root, inner: $('.inner', root), img: $('img', root), acts: $('.placed-acts', root), src: null };
+        root.addEventListener('pointerdown', (e) => startDrag(e, item.artId, item.id));
+        $('.round.edit', root).addEventListener('pointerdown', (e) => {
+          e.stopPropagation(); Studio.enter(item.artId);
+        });
+        $('.round.del', root).addEventListener('pointerdown', (e) => {
+          e.stopPropagation();
+          project.layout = project.layout.filter(l => l.id !== item.id);
+          selectedId = null;
+          redraw();
+        });
+        stageEl.appendChild(root);
+        nodes.set(item.id, n);
+      }
+      if (n.src !== art.imageSrc) { n.img.src = art.imageSrc; n.src = art.imageSrc; }
+
+      const u = unitSizeOf(art), o = outerSize(art);
+      const x0 = item.x - u.w / 2, y0 = item.y - u.h / 2;
+      const pixelCorners = [
+        { x: x0, y: y0 }, { x: x0 + u.w, y: y0 },
+        { x: x0 + u.w, y: y0 + u.h }, { x: x0, y: y0 + u.h }
+      ].map(p => pctToPx(transformPoint(p.x, p.y, H)));
+
+      const baseW = 200, baseH = baseW * (o.h / o.w);
+      const k = baseW / o.w;                       // px per cm inside the flat texture
+      const selected = selectedId === item.id;
+
+      n.root.style.width = baseW + 'px';
+      n.root.style.height = baseH + 'px';
+      n.root.style.transform = getCSSMatrix3d(baseW, baseH, pixelCorners);
+      n.root.style.zIndex = selected ? 50 : 10;
+      n.root.style.cursor = mode === 'MOVE_ART' ? (dragging ? 'grabbing' : 'grab') : 'default';
+      n.root.style.pointerEvents = mode === 'MOVE_ART' ? 'auto' : 'none';
+      n.root.classList.toggle('sel', selected);
+      n.inner.style.border = (art.frame.frameWidthCm * k) + 'px solid ' + art.frame.frameColor;
+      n.inner.style.padding = (art.frame.matWidthCm * k) + 'px';
+      n.inner.style.background = art.frame.matColor;
+      n.inner.style.boxShadow = (0.5 * k) + 'px ' + (0.5 * k) + 'px ' + (1.5 * k) + 'px rgba(0,0,0,.6)';
+      n.acts.classList.toggle('hidden', !(selected && mode === 'MOVE_ART'));
+    });
+
+    nodes.forEach((n, id) => {
+      if (!seen.has(id)) { n.root.remove(); nodes.delete(id); }
+    });
+  }
+
+  function drawGuides() {
+    guideSvg.innerHTML = '';
+    guideSvg.style.pointerEvents = 'none';
+    if (!showGuides || !rect.width || !project.wall) return;
+    const H = computeHomography(UNIT_SQUARE, project.wall.corners);
+    const removing = mode === 'REMOVE_GUIDE';
+
+    const add = (a, b, onRemove) => {
+      const p1 = pctToPx(a), p2 = pctToPx(b);
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      if (removing) { g.style.pointerEvents = 'auto'; g.style.cursor = 'pointer'; }
+      const hit = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      const vis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      [hit, vis].forEach(l => {
+        l.setAttribute('x1', p1.x); l.setAttribute('y1', p1.y);
+        l.setAttribute('x2', p2.x); l.setAttribute('y2', p2.y);
+      });
+      hit.setAttribute('stroke', 'transparent');
+      hit.setAttribute('stroke-width', '20');
+      vis.setAttribute('stroke', removing ? '#ef4444' : '#f472b6');
+      vis.setAttribute('stroke-width', removing ? '2' : '1');
+      vis.setAttribute('stroke-dasharray', '5,5');
+      g.appendChild(hit); g.appendChild(vis);
+      if (removing) g.addEventListener('click', (e) => { e.stopPropagation(); onRemove(); });
+      guideSvg.appendChild(g);
+    };
+
+    if (removing) guideSvg.style.pointerEvents = 'auto';
+    project.guides.v.forEach((gx, i) => add(
+      transformPoint(gx, 0, H), transformPoint(gx, 1, H),
+      () => { project.guides.v.splice(i, 1); redraw(); }));
+    project.guides.h.forEach((gy, i) => add(
+      transformPoint(0, gy, H), transformPoint(1, gy, H),
+      () => { project.guides.h.splice(i, 1); redraw(); }));
+  }
+
+  function drawWire() {
+    if (wireEl) { wireEl.remove(); wireEl = null; }
+    if (!showWire || !rect.width || !project.wall) return;
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'overlay-svg');
+    svg.style.zIndex = '5';
+    svg.style.opacity = '.35';
+    const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    poly.setAttribute('points', project.wall.corners.map(p => {
+      const q = pctToPx(p); return q.x + ',' + q.y;
+    }).join(' '));
+    poly.setAttribute('fill', 'rgba(59,130,246,.2)');
+    poly.setAttribute('stroke', '#3b82f6');
+    poly.setAttribute('stroke-width', '2');
+    svg.appendChild(poly);
+    stageEl.appendChild(svg);
+    wireEl = svg;
+  }
+
+  /* ---- interaction ---- */
+
+  function startDrag(e, artId, instanceId) {
+    if (instanceId && mode !== 'MOVE_ART') return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (!instanceId) setMode('MOVE_ART');
+
+    if (instanceId) {
+      const existing = project.layout.find(p => p.id === instanceId);
+      if (!existing) return;
+      selectedId = instanceId;
+      dragging = true;
+      const pos = toWallCoords(e.clientX, e.clientY);
+      dragOffset = pos ? { x: existing.x - pos.x, y: existing.y - pos.y } : { x: 0, y: 0 };
+    } else {
+      const placement = { id: String(Date.now()), artId: artId, x: 0.5, y: 0.5, rotation: 0 };
+      project.layout.push(placement);
+      selectedId = placement.id;
+      dragging = true;
+      dragOffset = { x: 0, y: 0 };
+    }
+    redraw();
+  }
+
+  function onPointerMove(e) {
+    if (!dragging || !selectedId) return;
+    const pos = toWallCoords(e.clientX, e.clientY);
+    if (!pos) return;
+    let x = pos.x + dragOffset.x, y = pos.y + dragOffset.y;
+
+    if (showGuides) {
+      const threshold = 0.015;
+      const item = project.layout.find(i => i.id === selectedId);
+      const art = item && project.inventory.find(a => a.id === item.artId);
+      const u = art ? unitSizeOf(art) : { w: 0, h: 0 };
+      const halfW = u.w / 2, halfH = u.h / 2;
+
+      project.guides.v.forEach(gx => {
+        if (Math.abs(x - gx) < threshold) x = gx;
+        if (snapMode === 'EDGE') {
+          if (Math.abs((x - halfW) - gx) < threshold) x = gx + halfW;
+          else if (Math.abs((x + halfW) - gx) < threshold) x = gx - halfW;
+        }
+      });
+      project.guides.h.forEach(gy => {
+        if (Math.abs(y - gy) < threshold) y = gy;
+        if (snapMode === 'EDGE') {
+          if (Math.abs((y - halfH) - gy) < threshold) y = gy + halfH;
+          else if (Math.abs((y + halfH) - gy) < threshold) y = gy - halfH;
+        }
+      });
+    }
+
+    const item = project.layout.find(p => p.id === selectedId);
+    if (item) { item.x = x; item.y = y; syncPlacements(); }
+  }
+
+  function onStagePointerDown(e) {
+    if (mode === 'ADD_GUIDE') {
+      const pos = toWallCoords(e.clientX, e.clientY);
+      if (pos) {
+        if (e.shiftKey) project.guides.h.push(pos.y);
+        else project.guides.v.push(pos.x);
+        drawGuides();
+      }
+    }
+    // Only touch the pieces here: rebuilding the guide layer on pointerdown
+    // would delete the very line a remove-click is on its way to.
+    if (selectedId !== null) { selectedId = null; syncPlacements(); }
+  }
+
+  function setMode(next) {
+    mode = next;
+    $('#tl-add').classList.toggle('on', next === 'ADD_GUIDE');
+    $('#tl-remove').classList.toggle('on', next === 'REMOVE_GUIDE');
+    stageEl.classList.toggle('crosshair', next === 'ADD_GUIDE');
+    const hint = $('#gal-hint');
+    hint.className = 'hint';
+    if (next === 'ADD_GUIDE') {
+      hint.classList.add('add');
+      hint.innerHTML = 'Click the wall to drop a vertical line.<br><span class="tiny" style="opacity:.8">Shift+click for a horizontal one.</span>';
+    } else if (next === 'REMOVE_GUIDE') {
+      hint.classList.add('rem');
+      hint.textContent = 'Click any red line to remove it.';
+    } else if (showGuides) {
+      hint.classList.add('info');
+      hint.textContent = 'Drag art near a pink line and it will snap to it.';
+    } else {
+      hint.classList.add('hidden');
+    }
+    redraw();
+  }
+
+  function setGuides(on) {
+    showGuides = on;
+    $('#tl-guides').textContent = 'Guides: ' + (on ? 'on' : 'off');
+    $('#tl-guides').classList.toggle('on', on);
+    $('#guide-tools').classList.toggle('hidden', !on);
+    $('#snap-group').classList.toggle('hidden', !on);
+    setMode('MOVE_ART');
+  }
+
+  /* ---- sidebar ---- */
+
+  function renderInventory() {
+    const host = $('#inventory-list');
+    host.innerHTML = '';
+    if (!project.inventory.length) {
+      host.innerHTML = '<p class="muted tiny" style="text-align:center;padding:16px">' +
+        'Nothing here yet. Add an artwork to start hanging.</p>';
+      return;
+    }
+    project.inventory.forEach(art => {
+      const card = document.createElement('div');
+      card.className = 'art-card';
+      card.innerHTML =
+        '<div class="art-thumb"><img alt=""></div>' +
+        '<div class="art-meta"><div>' +
+          '<p></p><p class="tiny muted"></p>' +
+        '</div><div class="art-acts">' +
+          '<button class="mini edit" title="Edit"><svg class="i sm" viewBox="0 0 24 24">' +
+            '<path d="M15.2 5.2l3.6 3.6M16.7 3.2a2.5 2.5 0 113.6 3.6L6.5 21H3v-3.6L16.7 3.2z"/></svg></button>' +
+          '<button class="mini del" title="Delete"><svg class="i sm" viewBox="0 0 24 24">' +
+            '<path d="M4 7h16M9 7V5h6v2m-8 0l1 13h8l1-13"/></svg></button>' +
+        '</div></div>';
+      const img = $('img', card);
+      img.src = art.imageSrc;
+      img.style.border = Math.max(1, art.frame.frameWidthCm / 2) + 'px solid ' + art.frame.frameColor;
+      img.style.padding = Math.max(0, art.frame.matWidthCm / 2) + 'px';
+      img.style.background = art.frame.matColor;
+      const texts = $$('.art-meta p', card);
+      texts[0].textContent = art.name;
+      texts[0].title = art.name;
+      texts[1].textContent = art.realWidthCm + ' x ' + art.realHeightCm + ' cm';
+      card.addEventListener('pointerdown', (e) => startDrag(e, art.id, null));
+      $('.mini.edit', card).addEventListener('pointerdown', (e) => {
+        e.stopPropagation(); Studio.enter(art.id);
+      });
+      $('.mini.del', card).addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+        const hung = project.layout.filter(l => l.artId === art.id).length;
+        const msg = 'Delete "' + art.name + '" from your collection?' +
+          (hung ? '\n\nIt is on the wall ' + hung + ' time(s) and will be taken down.' : '');
+        if (!confirm(msg)) return;
+        project.inventory = project.inventory.filter(a => a.id !== art.id);
+        project.layout = project.layout.filter(l => l.artId !== art.id);
+        project.savedLayouts.forEach(l => { l.items = l.items.filter(i => i.artId !== art.id); });
+        renderInventory();
+        redraw();
+      });
+      host.appendChild(card);
+    });
+  }
+
+  function renderLayoutList() {
+    const sel = $('#layout-select');
+    sel.innerHTML = '<option value="">Load arrangement…</option>';
+    project.savedLayouts.forEach(l => {
+      const o = document.createElement('option');
+      o.value = l.name;
+      o.textContent = l.name + ' (' + l.items.length + ')';
+      sel.appendChild(o);
+    });
+  }
+
+  /* ---- export a flat JPEG of the finished wall ---- */
+
+  async function exportImage() {
+    if (!wallImg.naturalWidth) return;
+    await busy('Rendering your wall…');
+    try {
+      const w = wallImg.naturalWidth, h = wallImg.naturalHeight;
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(wallImg, 0, 0);
+
+      const H_wall = computeHomography(UNIT_SQUARE,
+        project.wall.corners.map(p => ({ x: (p.x / 100) * w, y: (p.y / 100) * h })));
+
+      for (const item of project.layout) {
+        const art = project.inventory.find(a => a.id === item.artId);
+        if (!art) continue;
+
+        const u = unitSizeOf(art), o = outerSize(art);
+        const x0 = item.x - u.w / 2, y0 = item.y - u.h / 2;
+        const dstPoints = [
+          { x: x0, y: y0 }, { x: x0 + u.w, y: y0 },
+          { x: x0 + u.w, y: y0 + u.h }, { x: x0, y: y0 + u.h }
+        ].map(p => transformPoint(p.x, p.y, H_wall));
+
+        // Paint the framed picture flat, then warp it onto the wall plane.
+        const texW = 1000, texH = Math.max(1, Math.round(texW * (o.h / o.w)));
+        const tex = document.createElement('canvas');
+        tex.width = texW; tex.height = texH;
+        const tctx = tex.getContext('2d');
+        const k = texW / o.w;
+        const fPx = art.frame.frameWidthCm * k, mPx = art.frame.matWidthCm * k;
+        tctx.fillStyle = art.frame.frameColor;
+        tctx.fillRect(0, 0, texW, texH);
+        tctx.fillStyle = art.frame.matColor;
+        tctx.fillRect(fPx, fPx, texW - fPx * 2, texH - fPx * 2);
+        const artImg = await loadImage(art.imageSrc);
+        tctx.drawImage(artImg, fPx + mPx, fPx + mPx, texW - (fPx + mPx) * 2, texH - (fPx + mPx) * 2);
+        const texData = tctx.getImageData(0, 0, texW, texH).data;
+
+        let minX = w, minY = h, maxX = 0, maxY = 0;
+        dstPoints.forEach(p => {
+          minX = Math.min(minX, p.x); minY = Math.min(minY, p.y);
+          maxX = Math.max(maxX, p.x); maxY = Math.max(maxY, p.y);
+        });
+        minX = Math.floor(Math.max(0, minX)); minY = Math.floor(Math.max(0, minY));
+        maxX = Math.ceil(Math.min(w, maxX)); maxY = Math.ceil(Math.min(h, maxY));
+        const dw = maxX - minX, dh = maxY - minY;
+        if (dw <= 0 || dh <= 0) continue;   // hung entirely off the photo
+
+        const H_inv = computeHomography(dstPoints,
+          [{ x: 0, y: 0 }, { x: texW, y: 0 }, { x: texW, y: texH }, { x: 0, y: texH }]);
+
+        const dest = ctx.getImageData(minX, minY, dw, dh);
+        const dd = dest.data;
+        for (let y = 0; y < dh; y++) {
+          for (let x = 0; x < dw; x++) {
+            const gx = x + minX, gy = y + minY;
+            const denom = H_inv[6] * gx + H_inv[7] * gy + H_inv[8];
+            const uu = (H_inv[0] * gx + H_inv[1] * gy + H_inv[2]) / denom;
+            const vv = (H_inv[3] * gx + H_inv[4] * gy + H_inv[5]) / denom;
+            if (uu < 0 || uu >= texW || vv < 0 || vv >= texH) continue;
+            const t = ((vv | 0) * texW + (uu | 0)) * 4;
+            const d = (y * dw + x) * 4;
+            dd[d] = texData[t]; dd[d + 1] = texData[t + 1];
+            dd[d + 2] = texData[t + 2]; dd[d + 3] = 255;
+          }
+        }
+        ctx.putImageData(dest, minX, minY);
+      }
+
+      downloadURL(canvas.toDataURL('image/jpeg', 0.85), 'picture-this-wall.jpg');
+      toast('Wall exported as a JPEG.');
+    } catch (e) {
+      console.error(e);
+      alert('Sorry, the export failed.');
+    } finally {
+      unbusy();
+    }
+  }
+
+  /* ---- wiring ---- */
+
+  wallImg.addEventListener('load', measure);
+  window.addEventListener('resize', measure);
+  if (window.ResizeObserver) new ResizeObserver(measure).observe(stageEl);
+
+  stageEl.addEventListener('pointerdown', onStagePointerDown);
+  window.addEventListener('pointermove', onPointerMove);
+  window.addEventListener('pointerup', () => {
+    if (!dragging) return;
+    dragging = false;
+    syncPlacements();
+  });
+
+  $('#tl-guides').addEventListener('click', () => setGuides(!showGuides));
+  $('#tl-add').addEventListener('click', () => setMode(mode === 'ADD_GUIDE' ? 'MOVE_ART' : 'ADD_GUIDE'));
+  $('#tl-remove').addEventListener('click', () => setMode(mode === 'REMOVE_GUIDE' ? 'MOVE_ART' : 'REMOVE_GUIDE'));
+  $('#tl-snap-center').addEventListener('click', () => {
+    snapMode = 'CENTER';
+    $('#tl-snap-center').classList.add('on'); $('#tl-snap-edge').classList.remove('on');
+  });
+  $('#tl-snap-edge').addEventListener('click', () => {
+    snapMode = 'EDGE';
+    $('#tl-snap-edge').classList.add('on'); $('#tl-snap-center').classList.remove('on');
+  });
+  $('#tl-wire').addEventListener('click', () => {
+    showWire = !showWire;
+    $('#tl-wire').classList.toggle('on', showWire);
+    drawWire();
+  });
+  $('#tl-export').addEventListener('click', exportImage);
+  $('#tl-editwall').addEventListener('click', () => Wall.enter(project.wall));
+  $('#btn-new-art').addEventListener('click', () => Studio.enter(null));
+
+  $('#btn-save-layout').addEventListener('click', () => {
+    $('#layout-name').value = 'Arrangement ' + (project.savedLayouts.length + 1);
+    $('#layout-save-box').classList.remove('hidden');
+    $('#layout-name').focus();
+    $('#layout-name').select();
+  });
+  $('#layout-cancel').addEventListener('click', () => $('#layout-save-box').classList.add('hidden'));
+  $('#layout-confirm').addEventListener('click', () => {
+    const name = $('#layout-name').value.trim();
+    if (!name) return;
+    project.savedLayouts = project.savedLayouts.filter(l => l.name !== name);
+    project.savedLayouts.push({ name: name, items: clone(project.layout) });
+    $('#layout-save-box').classList.add('hidden');
+    renderLayoutList();
+    toast('Arrangement "' + name + '" saved.');
+  });
+  $('#layout-name').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') $('#layout-confirm').click();
+  });
+  $('#layout-select').addEventListener('change', (e) => {
+    const found = project.savedLayouts.find(l => l.name === e.target.value);
+    if (found) {
+      project.layout = clone(found.items);
+      selectedId = null;
+      redraw();
+      toast('Loaded "' + found.name + '".');
+    }
+  });
+  $('#layout-delete').addEventListener('click', () => {
+    const name = $('#layout-select').value;
+    if (!name) { toast('Pick an arrangement to delete first.'); return; }
+    if (!confirm('Delete the arrangement "' + name + '"?')) return;
+    project.savedLayouts = project.savedLayouts.filter(l => l.name !== name);
+    renderLayoutList();
+  });
+
+  // Backspace/Delete takes the selected piece off the wall.
+  window.addEventListener('keydown', (e) => {
+    if (currentView !== 'gallery' || !selectedId) return;
+    if (e.key !== 'Delete' && e.key !== 'Backspace') return;
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+    e.preventDefault();
+    project.layout = project.layout.filter(l => l.id !== selectedId);
+    selectedId = null;
+    redraw();
+  });
+
+  return { enter: enter, onShown: onShown };
+})();
+
+/* --------------------------------------------------------------------------
+   Boot
+   -------------------------------------------------------------------------- */
+
+$('#btn-fresh').addEventListener('click', () => {
+  project = blankProject();
+  markSaved();
+  Wall.enter(null);
+});
+$('#btn-continue').addEventListener('click', loadSession);
+$('#file-project').addEventListener('change', (e) => {
+  if (e.target.files && e.target.files[0]) importProject(e.target.files[0]);
+  e.target.value = '';
+});
+$('#btn-help').addEventListener('click', () => $('#help-box').classList.toggle('hidden'));
+$('#btn-home').addEventListener('click', showDashboard);
+$('#btn-save-session').addEventListener('click', saveSession);
+$('#btn-download').addEventListener('click', exportProject);
+$$('.step').forEach(s => s.addEventListener('click', () => {
+  const target = s.dataset.step;
+  if (target === 'wall') Wall.enter(project.wall);
+  if (target === 'art') Studio.enter(null);
+  if (target === 'gallery' && project.wall) Gallery.enter();
+}));
+
+// Don't let anyone lose an unsaved project to a stray tab close.
+window.addEventListener('beforeunload', (e) => {
+  if (!project.wall && !project.inventory.length) return;
+  if (stateSignature() === lastSavedSig) return;
+  e.preventDefault();
+  e.returnValue = '';
+});
+
+showDashboard();
+
+})();
 </script>
-</head>
-  <body>
-    <div id="root"></div>
-  </body>
+</body>
 </html>

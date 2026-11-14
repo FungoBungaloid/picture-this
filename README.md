@@ -33,6 +33,24 @@ be eyedroppered out of either photo and are kept in a palette. Record the hook
 drop (wire pulled taut, measured down from the top of the frame) and the nail
 heights account for it.
 
+**Round and irregular pieces.** Everything is still laid out, snapped and measured
+by the rectangle it fits inside, but it need not look like one. In the artwork
+editor, *Shape* offers three choices:
+
+- **Rectangle** — the default.
+- **Round** — a circle or oval filling the width and height you give. The mat and
+  frame curve with it, so a round mirror in a brass rim is a Round piece with a frame.
+- **Cut-out** — the image's own transparency is the outline, for a wreath, a
+  mask, antlers, a shaped mirror. A PNG or WebP that already has a transparent
+  background arrives as a cut-out with nothing more to do. For an ordinary photo,
+  press *Remove a background colour* and click the wall behind the piece: that
+  colour is cleared inwards from the edges of the photo, so the white wall goes and
+  the white highlight in the middle of the mirror stays. A slider sets how much is
+  taken, and clicking again clears a second colour or an enclosed gap. Cut-outs
+  have no mat or frame.
+
+When cropping, put the dots on the corners of the box the piece would just fit inside.
+
 Not bought it yet? **Add a blank panel** at the size you're considering and see
 whether it works on the wall before you spend anything.
 
@@ -52,27 +70,40 @@ you calibrated.
 
 | | |
 |---|---|
-| Arrow keys | nudge 1 cm (hold shift for 10) |
-| `Ctrl/Cmd` + `Z` / `⇧Z` | undo / redo placement |
+| Arrow keys | nudge 1 cm (hold shift for 10) — or ¼" and 1" when working in inches |
+| `Ctrl/Cmd` + `Z` / `⇧Z` or `Y` | undo / redo |
 | `Ctrl/Cmd` + `D` | duplicate |
 | `Ctrl/Cmd` + `A` | select everything on the wall |
 | `Ctrl/Cmd` + `S` | save the session |
 | `⇧` click | add to the selection |
 | `Delete` | take the selection down |
-| `Esc` | leave a field, or clear the selection |
+| `Esc` | leave a field, close the plan, or clear the selection |
+
+Double-click a piece on the wall to edit it. Drop an image file anywhere on the
+window to add it as an artwork. On a touch screen, tap a piece in the collection
+to hang it at eye level, then drag it into place.
 
 ## Saving
 
 - **Save** keeps the project in this browser, on this device. Photos are
   downscaled on the way in so this usually fits, but browser storage is small.
+  The browser holds one project at a time; saving a different one over it asks
+  first. A dot on the Save button means there are changes not yet saved.
+- Give the project a **name** in the top bar and the exported file is named after it.
 - **Export ▸ Project file** writes a `.json` holding every wall, every picture and
   every saved arrangement, images included. That is the copy worth keeping, and
   the one to move between computers. Files written by the first version still open.
 - **Export ▸ Photo** renders the wall at the resolution of your original
   photograph, with or without the measurements marked on it.
 
-Undo covers placement, sizing and framing. Adding or deleting an artwork is not
-undoable, which is why deleting asks first.
+Undo covers placement, guides, sizing, framing and the wall's measurements. Adding
+or deleting an artwork is not undoable, which is why deleting asks first — and
+deleting one, or recalibrating a wall, clears the undo history, so an undo can
+never pair old measurements with a new photo.
+
+A project file is read strictly: colours must be hex colours and pictures must be
+embedded images, so opening a file from someone else cannot make the page fetch
+anything from the network.
 
 ## Design notes
 

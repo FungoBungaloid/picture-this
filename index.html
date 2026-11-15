@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#111113">
 <title>Picture This</title>
 <style>
 /* ==========================================================================
@@ -38,7 +40,6 @@ button{background:none;border:0;padding:0;cursor:pointer;color:inherit}
 .dim{color:var(--text-2)}
 .faint{color:var(--text-3)}
 .t-xs{font-size:11px}
-.serif{font-family:var(--serif)}
 .micro{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3)}
 .row{display:flex;align-items:center;gap:8px}
 .row-sb{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -80,6 +81,8 @@ svg.i.lg{width:22px;height:22px;stroke-width:1.4}
 .seg button{padding:4px 10px;font-size:11.5px;font-weight:500;border-radius:5px;color:var(--text-3)}
 .seg button:hover{color:var(--text)}
 .seg button.on{background:var(--raise);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.3)}
+.seg.block{display:flex}
+.seg.block button{flex:1}
 
 input[type=text],input[type=number],input[type=search],select,textarea{
   width:100%;background:#0d0d0f;border:1px solid var(--line);border-radius:6px;
@@ -120,11 +123,12 @@ label.check input{accent-color:var(--gold);width:14px;height:14px}
   width:100%;text-align:left}
 .start-act+.start-act{border-top:1px solid var(--line)}
 .start-act:hover{background:var(--panel-2)}
+.start-act:disabled{opacity:.45;pointer-events:none}
 .start-act .ic{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;
   background:var(--raise);color:var(--text-2);flex:none}
 .start-act:hover .ic{color:var(--gold)}
-.start-act h3{font-size:14px;font-weight:600}
-.start-act p{font-size:12px;color:var(--text-3);margin-top:1px}
+.start-act .t{display:block;font-size:14px;font-weight:600}
+.start-act .d{display:block;font-size:12px;color:var(--text-3);margin-top:1px}
 .start-act .go{margin-left:auto;color:var(--text-3)}
 .start-foot{margin-top:26px;font-size:12px;color:var(--text-3);line-height:1.7}
 .start-foot b{color:var(--text-2);font-weight:600}
@@ -136,6 +140,9 @@ label.check input{accent-color:var(--gold);width:14px;height:14px}
 .mark{font-family:var(--serif);font-size:17px;letter-spacing:.01em;cursor:pointer;flex:none}
 .mark em{font-style:italic;color:var(--gold)}
 .topbar .div{width:1px;height:22px;background:var(--line);flex:none}
+.topbar .projname{width:150px;flex:none;background:transparent;border-color:transparent;font-weight:500}
+.topbar .projname:hover{border-color:var(--line);background:var(--panel-2)}
+#btn-save.dirty::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold)}
 .wallpick{display:flex;align-items:center;gap:6px;min-width:0}
 .wallpick select{width:auto;max-width:190px;background:transparent;border-color:transparent;font-weight:500}
 .wallpick select:hover{border-color:var(--line);background:var(--panel-2)}
@@ -162,7 +169,8 @@ label.check input{accent-color:var(--gold);width:14px;height:14px}
 .piece-meta .nm{font-size:11.5px;font-weight:500;line-height:1.3}
 .piece-meta .sz{font-size:10.5px;color:var(--text-3);font-variant-numeric:tabular-nums}
 .piece-tools{position:absolute;top:5px;right:5px;display:flex;gap:3px;opacity:0;transition:opacity .12s}
-.piece:hover .piece-tools{opacity:1}
+.piece:hover .piece-tools,.piece:focus-within .piece-tools{opacity:1}
+@media(hover:none){.piece-tools{opacity:1}}
 .piece-tools button{width:22px;height:22px;border-radius:5px;background:rgba(12,12,13,.85);
   border:1px solid var(--line);display:grid;place-items:center;color:var(--text-2);backdrop-filter:blur(4px)}
 .piece-tools button:hover{color:var(--text);background:var(--raise)}
@@ -174,7 +182,8 @@ label.check input{accent-color:var(--gold);width:14px;height:14px}
 /* ---------- canvas ---------- */
 .canvas-wrap{flex:1;position:relative;min-width:0;background:
   radial-gradient(110% 80% at 50% 40%,#141416 0%,#09090a 100%);overflow:hidden}
-#stage{position:absolute;inset:0;touch-action:none}
+/* isolated, so a selected piece can never climb over the toolbars or the readout */
+#stage{position:absolute;inset:0;touch-action:none;isolation:isolate}
 #wallimg{position:absolute;pointer-events:none;user-select:none}
 #overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:45}
 .placed{position:absolute;top:0;left:0;transform-origin:0 0;z-index:10}
@@ -205,6 +214,10 @@ label.check input{accent-color:var(--gold);width:14px;height:14px}
   font-variant-numeric:tabular-nums;white-space:nowrap;box-shadow:var(--shadow);
   transform:translate(-50%,-140%);backdrop-filter:blur(6px)}
 .hud b{color:var(--gold);font-weight:600}
+.hint{position:absolute;z-index:24;left:50%;bottom:16px;transform:translateX(-50%);pointer-events:none;
+  background:rgba(17,17,19,.93);border:1px solid var(--line);border-radius:20px;padding:6px 14px;
+  font-size:12px;color:var(--text-2);white-space:nowrap;max-width:calc(100% - 24px);
+  overflow:hidden;text-overflow:ellipsis}
 .hud .sep{color:var(--text-3);margin:0 5px}
 
 .menu{position:absolute;z-index:60;background:var(--panel-2);border:1px solid var(--line-2);
@@ -231,7 +244,6 @@ label.check input{accent-color:var(--gold);width:14px;height:14px}
 .sect[open]>summary .chev{transform:rotate(90deg)}
 .sect-body{padding:2px 14px 15px;display:flex;flex-direction:column;gap:12px}
 .duo{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .align-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
 .align-grid button{height:30px;border:1px solid var(--line);border-radius:6px;display:grid;
   place-items:center;color:var(--text-2);background:var(--panel-2)}
@@ -304,6 +316,16 @@ label.check input{accent-color:var(--gold);width:14px;height:14px}
 .art-stage{display:flex;flex-direction:column;align-items:center;gap:20px;max-height:100%}
 .mount{box-sizing:content-box;box-shadow:0 18px 44px rgba(0,0,0,.6);position:relative}
 .mount img{display:block;width:100%;height:100%;object-fit:fill}
+.mount .ph{width:100%;height:100%}
+/* Shapes. A round piece curves its frame, mat and picture together. A cut-out
+   has no frame at all: the image's own transparency is its outline, so the
+   shadow has to follow the pixels rather than the box. */
+.mount.round,.mount.round>*{border-radius:50%}
+.mount.free{box-shadow:none!important;overflow:visible!important}
+.mount.free img{filter:drop-shadow(0 2px 5px rgba(0,0,0,.5))}
+#as-mount.free{outline:1px dashed var(--line-2);outline-offset:3px;
+  background:repeating-conic-gradient(#2b2b30 0 25%,#1b1b1e 0 50%) 0 0/18px 18px!important}
+#as-mount.free img{filter:none}
 .scalebar{display:flex;align-items:center;gap:9px;color:var(--text-3);font-size:11px;
   font-variant-numeric:tabular-nums}
 .scalebar .ln{height:7px;border-left:1px solid var(--text-3);border-right:1px solid var(--text-3);
@@ -369,9 +391,20 @@ table.plan tr:hover td{background:var(--panel-2)}
 /* ---------- narrow ---------- */
 @media(max-width:1080px){:root{--rail:212px;--insp:250px}}
 @media(max-width:860px){
+  .topbar{overflow-x:auto;overflow-y:hidden}
+  .topbar>*{flex:none}
   .workspace{flex-direction:column}
-  .rail{width:100%;height:150px;border-right:0;border-bottom:1px solid var(--line)}
-  .rail-body{grid-template-columns:repeat(auto-fill,minmax(88px,1fr))}
+  /* the collection becomes one strip you swipe sideways, so it costs the wall little height */
+  .rail{width:100%;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+  .rail-head{flex-direction:row;align-items:center;padding:8px 10px}
+  .rail-head>.row-sb{display:none}
+  .rail-head .btn{width:auto;flex:none}
+  .rail-head .unit-in{flex:1}
+  .rail-body{display:flex;flex:none;overflow-x:auto;overflow-y:hidden;padding:8px 10px}
+  .rail-body .piece{flex:0 0 96px}
+  .rail-foot{flex-direction:row;align-items:center;padding:6px 10px}
+  .rail-foot>.row{flex:1}
+  .canvas-wrap{min-height:200px}
   .inspector{width:100%;max-height:44%;border-left:0;border-top:1px solid var(--line)}
   .sheet-body{flex-direction:column}
   .side{width:100%;border-left:0;border-top:1px solid var(--line);max-height:46%}
@@ -421,23 +454,28 @@ table.plan tr:hover td{background:var(--panel-2)}
     <p class="start-sub">Photograph your wall, hang your art on it, and walk away with the
       measurements you need to put the nails in the right place.</p>
     <div class="start-acts">
+      <button class="start-act hidden" id="go-back">
+        <span class="ic"><svg class="i lg"><use href="#s-wall"/></svg></span>
+        <span><span class="t">Back to your project</span><span class="d" id="back-meta"></span></span>
+        <span class="go"><svg class="i"><use href="#s-next"/></svg></span>
+      </button>
       <button class="start-act" id="go-new">
         <span class="ic"><svg class="i lg"><use href="#s-plus"/></svg></span>
-        <span><h3>New project</h3><p>Start with a photo of your wall</p></span>
+        <span><span class="t">New project</span><span class="d">Start with a photo of your wall</span></span>
         <span class="go"><svg class="i"><use href="#s-next"/></svg></span>
       </button>
       <button class="start-act" id="go-continue">
         <span class="ic"><svg class="i lg"><use href="#s-clock"/></svg></span>
-        <span><h3>Continue</h3><p id="continue-meta">Resume your last session</p></span>
+        <span><span class="t">Continue</span><span class="d" id="continue-meta">Resume your last session</span></span>
         <span class="go"><svg class="i"><use href="#s-next"/></svg></span>
       </button>
-      <label class="start-act" style="cursor:pointer">
+      <button class="start-act" id="go-open">
         <span class="ic"><svg class="i lg"><use href="#s-up"/></svg></span>
-        <span><h3>Open a project file</h3><p>A .json you downloaded earlier</p></span>
+        <span><span class="t">Open a project file</span><span class="d">A .json you downloaded earlier &mdash; or drop it here</span></span>
         <span class="go"><svg class="i"><use href="#s-next"/></svg></span>
-        <input type="file" id="file-project" accept=".json,application/json" hidden>
-      </label>
+      </button>
     </div>
+    <input type="file" id="file-project" accept=".json,application/json" hidden>
     <p class="start-foot">Everything happens in this browser tab. <b>Your photos are never uploaded</b>
       &mdash; there is nowhere for them to go.</p>
   </div>
@@ -446,7 +484,10 @@ table.plan tr:hover td{background:var(--panel-2)}
 <!-- ================= APP ================= -->
 <div id="app" class="hidden">
   <div class="topbar">
-    <div class="mark" id="go-home" title="Back to the start screen">Picture <em>This</em></div>
+    <button class="mark" id="go-home" title="Back to the start screen">Picture <em>This</em></button>
+    <div class="div"></div>
+    <input type="text" class="projname" id="proj-name" placeholder="Untitled project" maxlength="60"
+      aria-label="Project name" title="Project name — used for the exported file">
     <div class="div"></div>
     <div class="wallpick">
       <select id="wall-select" title="Which wall you are working on"></select>
@@ -455,10 +496,10 @@ table.plan tr:hover td{background:var(--panel-2)}
     </div>
     <div class="grow"></div>
     <button class="btn icon ghost" id="btn-undo" title="Undo (Ctrl+Z)"><svg class="i"><use href="#s-undo"/></svg></button>
-    <button class="btn icon ghost" id="btn-redo" title="Redo (Ctrl+Shift+Z)"><svg class="i"><use href="#s-redo"/></svg></button>
+    <button class="btn icon ghost" id="btn-redo" title="Redo (Ctrl+Shift+Z or Ctrl+Y)"><svg class="i"><use href="#s-redo"/></svg></button>
     <div class="div"></div>
     <div class="seg" id="units"><button data-u="cm" class="on">cm</button><button data-u="in">in</button></div>
-    <button class="btn sm" id="btn-save">Save</button>
+    <button class="btn sm" id="btn-save" title="Save in this browser (Ctrl+S)">Save</button>
     <button class="btn sm primary" id="btn-plan"><svg class="i sm"><use href="#s-print"/></svg>Hanging plan</button>
   </div>
 
@@ -469,7 +510,7 @@ table.plan tr:hover td{background:var(--panel-2)}
         <div class="row-sb"><span class="micro">Collection</span><span class="micro num" id="coll-count"></span></div>
         <button class="btn sm block primary" id="btn-add-art"><svg class="i sm"><use href="#s-plus"/></svg>Add artwork</button>
         <div class="unit-in" style="position:relative">
-          <input type="search" id="coll-search" placeholder="Filter…" style="padding-left:26px">
+          <input type="search" id="coll-search" placeholder="Filter…" aria-label="Filter the collection" style="padding-left:26px">
           <svg class="i sm" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--text-3)"><use href="#s-search"/></svg>
         </div>
       </div>
@@ -477,7 +518,7 @@ table.plan tr:hover td{background:var(--panel-2)}
       <div class="rail-foot">
         <div class="row-sb"><span class="micro">Arrangements</span>
           <button class="btn sm ghost" id="arr-save" style="padding:2px 6px;font-size:11px">Save current</button></div>
-        <div class="row"><select id="arr-select" style="flex:1"></select>
+        <div class="row"><select id="arr-select" style="flex:1" aria-label="Saved arrangements"></select>
           <button class="btn icon sm" id="arr-del" title="Delete arrangement"><svg class="i sm"><use href="#s-trash"/></svg></button></div>
       </div>
     </aside>
@@ -495,9 +536,10 @@ table.plan tr:hover td{background:var(--panel-2)}
         <button id="t-outline" title="Show the wall surface you calibrated"><svg class="i sm"><use href="#s-outline"/></svg></button>
       </div>
       <div class="bar tr">
-        <button id="t-export"><svg class="i sm"><use href="#s-share"/></svg>Export</button>
+        <button id="t-export" title="Save an image, the plan, or the whole project"><svg class="i sm"><use href="#s-share"/></svg>Export</button>
       </div>
       <div class="hud hidden" id="hud"></div>
+      <div class="hint hidden" id="hint"></div>
     </div>
 
     <!-- inspector -->
@@ -561,17 +603,19 @@ table.plan tr:hover td{background:var(--panel-2)}
             <div class="unit-in"><input type="number" id="ip-h" step="0.5"><span class="u"></span></div></div>
         </div>
         <label class="check"><input type="checkbox" id="ip-lock" checked><span>Keep the original proportions</span></label>
-        <div class="duo">
-          <div class="field"><span class="micro">Mat</span>
-            <div class="unit-in"><input type="number" id="ip-mat" step="0.5" min="0"><span class="u"></span></div></div>
-          <div class="field"><span class="micro">Frame</span>
-            <div class="unit-in"><input type="number" id="ip-frame" step="0.5" min="0"><span class="u"></span></div></div>
+        <div class="col" id="ip-framing" style="gap:12px">
+          <div class="duo">
+            <div class="field"><span class="micro">Mat</span>
+              <div class="unit-in"><input type="number" id="ip-mat" step="0.5" min="0"><span class="u"></span></div></div>
+            <div class="field"><span class="micro">Frame</span>
+              <div class="unit-in"><input type="number" id="ip-frame" step="0.5" min="0"><span class="u"></span></div></div>
+          </div>
+          <div class="field"><span class="micro">Mat colour</span><div class="swatches" id="ip-mat-sw"></div></div>
+          <div class="field"><span class="micro">Frame colour</span><div class="swatches" id="ip-frame-sw"></div></div>
         </div>
-        <div class="field"><span class="micro">Mat colour</span><div class="swatches" id="ip-mat-sw"></div></div>
-        <div class="field"><span class="micro">Frame colour</span><div class="swatches" id="ip-frame-sw"></div></div>
-        <div class="field"><span class="micro">Hook drop from top of frame</span>
+        <div class="field"><span class="micro" id="ip-drop-lbl">Hook drop from top of frame</span>
           <div class="unit-in"><input type="number" id="ip-drop" step="0.5" min="0"><span class="u"></span></div>
-          <span class="t-xs faint">Pull the wire taut and measure down from the frame's top edge.</span></div>
+          <span class="t-xs faint">Pull the wire taut and measure down from the top edge.</span></div>
         <button class="btn sm block" id="ip-edit"><svg class="i sm"><use href="#s-img"/></svg>Edit artwork</button>
       </div>
     </details>
@@ -602,7 +646,7 @@ table.plan tr:hover td{background:var(--panel-2)}
           <span class="t-xs faint">Zero if the area you marked runs down to the skirting.</span></div>
         <div class="field"><span class="micro">Eye level</span>
           <div class="unit-in"><input type="number" id="iw-eye" step="1"><span class="u"></span></div>
-          <span class="t-xs faint">Galleries hang centres at about 145&nbsp;cm.</span></div>
+          <span class="t-xs faint" id="iw-eye-note"></span></div>
         <div class="row" style="gap:6px">
           <button class="btn sm" style="flex:1" id="iw-edit"><svg class="i sm"><use href="#s-wall"/></svg>Recalibrate</button>
           <button class="btn sm danger icon" id="iw-del" title="Delete this wall"><svg class="i sm"><use href="#s-trash"/></svg></button>
@@ -615,7 +659,7 @@ table.plan tr:hover td{background:var(--panel-2)}
       <div class="sect-body">
         <label class="check"><input type="checkbox" id="sn-pieces" checked><span>Snap to other pieces</span></label>
         <label class="check"><input type="checkbox" id="sn-guides" checked><span>Snap to guide lines</span></label>
-        <label class="check"><input type="checkbox" id="sn-grid"><span>Snap to a 1&nbsp;cm grid</span></label>
+        <label class="check"><input type="checkbox" id="sn-grid"><span id="sn-grid-lbl">Snap to a 1&nbsp;cm grid</span></label>
         <hr class="rule">
         <div id="guide-list" class="col" style="gap:6px"></div>
         <div class="row" style="gap:6px">
@@ -682,7 +726,8 @@ table.plan tr:hover td{background:var(--panel-2)}
       </div>
       <div class="grp">
         <h3>Name</h3>
-        <input type="text" id="ws-name" placeholder="Living room">
+        <input type="text" id="ws-name" placeholder="Living room" aria-label="Wall name">
+        <button class="btn sm block" id="ws-replace">Use a different photo</button>
       </div>
     </aside>
   </div>
@@ -706,9 +751,10 @@ table.plan tr:hover td{background:var(--panel-2)}
         <label class="drop" style="max-width:330px;cursor:pointer">
           <span class="ic"><svg class="i lg"><use href="#s-img"/></svg></span>
           <h3>From a photo</h3>
-          <p>Shoot the picture from wherever you are standing. The angle gets straightened out
-             in the next step.</p>
+          <p>Shoot the piece from wherever you are standing. The angle gets straightened out
+             in the next step. Round and irregular pieces work too.</p>
           <span class="btn primary">Choose a photo</span>
+          <span class="t-xs faint">or drop one anywhere</span>
           <input type="file" id="as-file" accept="image/*" hidden>
         </label>
         <button class="drop" id="as-blank" style="max-width:330px">
@@ -724,7 +770,7 @@ table.plan tr:hover td{background:var(--panel-2)}
       <div class="loupe" id="as-loupe"><canvas width="112" height="112"></canvas></div>
       <!-- detail preview -->
       <div class="art-stage hidden" id="as-preview">
-        <div class="mount" id="as-mount"><img id="as-img" alt=""><div class="ph hidden" id="as-ph"></div></div>
+        <div class="mount" id="as-mount"><img id="as-img" alt="Preview of the piece"><div class="ph hidden" id="as-ph"></div></div>
         <div class="scalebar"><span id="as-scale-lbl"></span><span class="ln" id="as-scale-ln"></span></div>
       </div>
     </div>
@@ -746,6 +792,28 @@ table.plan tr:hover td{background:var(--panel-2)}
           <div class="swatches" id="as-panel-sw"></div></div>
       </div>
       <div class="grp">
+        <h3>Shape</h3>
+        <div class="seg block" id="as-shape">
+          <button type="button" data-s="rect">Rectangle</button>
+          <button type="button" data-s="ellipse">Round</button>
+          <button type="button" data-s="free">Cut-out</button>
+        </div>
+        <span class="t-xs faint" id="as-shape-note"></span>
+        <div class="grp hidden" id="as-key">
+          <button class="btn sm block" id="as-key-pick"><svg class="i sm"><use href="#s-eye"/></svg>Remove a background colour</button>
+          <span class="t-xs faint">Click the wall or backdrop around the piece and it is cleared away,
+            working inwards from the edges of the photo. Click again for another colour or a
+            gap in the middle.</span>
+          <div class="grp hidden" id="as-key-more">
+            <div class="field"><div class="row-sb"><span class="micro">How much to clear</span>
+              <span class="t-xs faint num" id="as-key-tol-val"></span></div>
+              <input type="range" id="as-key-tol" min="4" max="140" step="2" value="32"
+                aria-label="How much of the background colour to clear"></div>
+            <button class="btn sm block" id="as-key-undo">Put that colour back</button>
+          </div>
+        </div>
+      </div>
+      <div class="grp" id="as-framing">
         <h3>Framing</h3>
         <div class="fpreset" id="as-fpresets"></div>
         <div class="duo">
@@ -763,10 +831,10 @@ table.plan tr:hover td{background:var(--panel-2)}
       </div>
       <div class="grp">
         <h3>Hanging</h3>
-        <div class="field"><span class="micro">Hook drop from top of frame</span>
+        <div class="field"><span class="micro" id="as-drop-lbl">Hook drop from top of frame</span>
           <div class="unit-in"><input type="number" id="as-drop" step="0.5" min="0"><span class="u"></span></div>
           <span class="t-xs faint">Hang the wire from a finger, pull it taut, and measure from
-            there to the top of the frame. Leave at zero for a flush hanger.</span></div>
+            there to the top edge. Leave at zero for a flush hanger.</span></div>
       </div>
       <div class="grp" id="as-total-wrap">
         <h3>On the wall</h3>
@@ -791,7 +859,7 @@ table.plan tr:hover td{background:var(--panel-2)}
 </div>
 
 <div id="printarea"></div>
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"></div>
 <div id="busy" class="hidden"><div><div class="spin"></div><p id="busy-text">Working…</p></div></div>
 
 <script>
@@ -912,6 +980,8 @@ const loadImage = (src) => new Promise((res, rej) => {
   const i = new Image();
   i.onload = () => res(i); i.onerror = () => rej(new Error('bad image')); i.src = src;
 });
+const fileStem = (name, fallback) =>
+  String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || fallback;
 function downloadURL(href, name) {
   const a = document.createElement('a');
   a.href = href; a.download = name;
@@ -929,7 +999,19 @@ function downloadCanvas(canvas, name, quality) {
 
 // Phone photos are 4000px wide and end up base64'd into storage. Shrinking on
 // the way in is the difference between a session that saves and one that doesn't.
-async function importPhoto(file, maxDim) {
+function hasTransparency(ctx, w, h) {
+  const d = ctx.getImageData(0, 0, w, h).data;
+  for (let i = 3; i < d.length; i += 4) if (d[i] < 250) return true;
+  return false;
+}
+// JPEG cannot hold transparency. WebP can and stays small; browsers that will
+// not write it hand back a PNG, which is larger but correct.
+function encodeWithAlpha(canvas) {
+  const u = canvas.toDataURL('image/webp', 0.92);
+  return u.indexOf('data:image/webp') === 0 ? u : canvas.toDataURL('image/png');
+}
+
+async function importPhoto(file, maxDim, keepAlpha) {
   const img = await loadImage(await readAs(file, 'readAsDataURL'));
   const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
   if (scale === 1 && file.size < 1.5e6) return img.src;
@@ -938,6 +1020,8 @@ async function importPhoto(file, maxDim) {
   const ctx = c.getContext('2d');
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(img, 0, 0, c.width, c.height);
+  if (keepAlpha && file.type !== 'image/jpeg' && hasTransparency(ctx, c.width, c.height))
+    return encodeWithAlpha(c);
   return c.toDataURL('image/jpeg', 0.88);
 }
 
@@ -952,6 +1036,9 @@ const Units = {
   label() { return this.isIn ? 'in' : 'cm'; },
   toDisp(cm) { return this.isIn ? cm / IN : cm; },
   fromDisp(v) { return this.isIn ? v * IN : v; },
+  // Steps that land on marks a tape measure actually has, in either system.
+  nudge(big) { return this.isIn ? (big ? IN : IN / 4) : (big ? 10 : 1); },
+  grid() { return this.isIn ? IN / 2 : 1; },
   // for number inputs: plain decimal, tight precision
   input(cm) { return Math.round(this.toDisp(cm) * (this.isIn ? 100 : 10)) / (this.isIn ? 100 : 10); },
   // for reading: 57 1/8 in / 145.5 cm
@@ -988,7 +1075,7 @@ function blankWall() {
     layout: [], guides: { h: [], v: [] }, savedLayouts: [] };
 }
 function blankProject() {
-  return { version: 2, name: 'Untitled', palette: DEFAULT_PALETTE.slice(), inventory: [],
+  return { version: 2, id: uid(), name: 'Untitled', palette: DEFAULT_PALETTE.slice(), inventory: [],
     walls: [], activeWallId: null, units: 'cm',
     snap: { pieces: true, guides: true, grid: false },
     show: { guides: true, ruler: true, tags: false, outline: false } };
@@ -999,10 +1086,17 @@ let selection = [];
 
 const wall = () => project.walls.find(w => w.id === project.activeWallId) || project.walls[0] || null;
 const art  = (id) => project.inventory.find(a => a.id === id);
+// A piece is a rectangle, an ellipse inscribed in one, or a cut-out whose
+// outline is the image's own transparency. All three are laid out, snapped and
+// measured by their bounding box. A cut-out carries no mat or frame.
+const SHAPES = ['rect', 'ellipse', 'free'];
+const rim = (a) => a.shape === 'free' ? { frame: 0, mat: 0 }
+  : { frame: a.frame.frameWidthCm, mat: a.frame.matWidthCm };
 const outer = (a) => {
-  const p = (a.frame.frameWidthCm + a.frame.matWidthCm) * 2;
+  const r = rim(a), p = (r.frame + r.mat) * 2;
   return { w: a.realWidthCm + p, h: a.realHeightCm + p };
 };
+const resetHistory = () => { history.past.length = 0; history.future.length = 0; };
 // wall coords (0..1) <-> real centimetres (across from left edge, up from floor)
 const toCm = (w, it) => ({ x: it.x * w.realWidthCm, y: w.floorOffsetCm + (1 - it.y) * w.realHeightCm });
 const toUV = (w, xCm, yCm) => ({ x: xCm / w.realWidthCm, y: 1 - (yCm - w.floorOffsetCm) / w.realHeightCm });
@@ -1013,73 +1107,101 @@ function addToPalette(hex) {
 }
 
 /* ---- migration: v1 files had one wall and unit-space guides ---- */
+// A project file is somebody else's data until proven otherwise. Colours end up
+// in style attributes and image sources in <img>, so both are held to the one
+// form this app ever writes: a hex colour, and an embedded data: image. Anything
+// else could make the page fetch from the network, which it promises never to do.
+const hexOr = (v, d) => (typeof v === 'string' && /^#[0-9a-f]{3,8}$/i.test(v)) ? v : d;
+const dataImage = (v) => (typeof v === 'string' && /^data:image\//i.test(v)) ? v : '';
+
 function normalizeProject(raw) {
   if (!raw || typeof raw !== 'object') throw new Error('not a project');
   const p = blankProject();
-  p.name = typeof raw.name === 'string' ? raw.name : 'Untitled';
-  if (Array.isArray(raw.palette) && raw.palette.length) p.palette = raw.palette;
+  if (typeof raw.id === 'string' && raw.id) p.id = raw.id;
+  p.name = typeof raw.name === 'string' && raw.name.trim() ? raw.name.trim().slice(0, 60) : 'Untitled';
+  if (Array.isArray(raw.palette)) {
+    const pal = raw.palette.filter(c => hexOr(c, null));
+    if (pal.length) p.palette = pal.slice(0, 14);
+  }
   if (raw.units === 'in') p.units = 'in';
   if (raw.snap) Object.assign(p.snap, raw.snap);
   if (raw.show) Object.assign(p.show, raw.show);
 
-  p.inventory = (Array.isArray(raw.inventory) ? raw.inventory : []).map(a => ({
+  const size = (v, d) => Math.max(0.1, numOr(v, d));
+  p.inventory = (Array.isArray(raw.inventory) ? raw.inventory : []).filter(a => a && typeof a === 'object').map(a => ({
     id: a.id || uid(),
-    name: a.name || 'Untitled',
-    imageSrc: a.imageSrc || null,
-    color: a.color || '#8d8a85',
-    realWidthCm: numOr(a.realWidthCm, 50),
-    realHeightCm: numOr(a.realHeightCm, 50),
-    srcAspect: numOr(a.srcAspect, numOr(a.realWidthCm, 50) / numOr(a.realHeightCm, 50)),
-    hangerDropCm: numOr(a.hangerDropCm, 0),
+    name: String(a.name || 'Untitled'),
+    imageSrc: dataImage(a.imageSrc) || null,
+    color: hexOr(a.color, '#8d8a85'),
+    shape: SHAPES.indexOf(a.shape) >= 0 ? a.shape : 'rect',
+    realWidthCm: size(a.realWidthCm, 50),
+    realHeightCm: size(a.realHeightCm, 50),
+    srcAspect: size(a.srcAspect, size(a.realWidthCm, 50) / size(a.realHeightCm, 50)),
+    hangerDropCm: Math.max(0, numOr(a.hangerDropCm, 0)),
     frame: {
-      matColor: (a.frame && a.frame.matColor) || '#f4f1ea',
-      matWidthCm: numOr(a.frame && a.frame.matWidthCm, 0),
-      frameColor: (a.frame && a.frame.frameColor) || '#1a1a1a',
-      frameWidthCm: numOr(a.frame && a.frame.frameWidthCm, 0)
+      matColor: hexOr(a.frame && a.frame.matColor, '#f4f1ea'),
+      matWidthCm: Math.max(0, numOr(a.frame && a.frame.matWidthCm, 0)),
+      frameColor: hexOr(a.frame && a.frame.frameColor, '#1a1a1a'),
+      frameWidthCm: Math.max(0, numOr(a.frame && a.frame.frameWidthCm, 0))
     }
   }));
+  // A placement whose artwork is gone has nothing to draw and nothing to measure.
+  const known = {};
+  p.inventory.forEach(a => { known[a.id] = true; });
+  const items = (list) => (Array.isArray(list) ? list : [])
+    .filter(i => i && known[i.artId])
+    .map(i => ({ id: i.id || uid(), artId: i.artId, x: numOr(i.x, .5), y: numOr(i.y, .5) }));
 
   const mkWall = (w, extra) => {
     const b = blankWall();
     b.id = w.id || uid();
-    b.name = w.name || (extra && extra.name) || 'Wall';
-    b.imageSrc = w.imageSrc || '';
-    b.corners = Array.isArray(w.corners) && w.corners.length === 4 ? clone(w.corners) : b.corners;
-    b.realWidthCm = numOr(w.realWidthCm, 300);
-    b.realHeightCm = numOr(w.realHeightCm, w.aspectRatio ? w.realWidthCm / w.aspectRatio : 250);
-    b.floorOffsetCm = numOr(w.floorOffsetCm, 0);
+    b.name = String(w.name || (extra && extra.name) || 'Wall');
+    b.imageSrc = dataImage(w.imageSrc);
+    if (Array.isArray(w.corners) && w.corners.length === 4)
+      b.corners = w.corners.map((c, i) => ({ x: numOr(c && c.x, b.corners[i].x), y: numOr(c && c.y, b.corners[i].y) }));
+    b.realWidthCm = size(w.realWidthCm, 300);
+    b.realHeightCm = size(w.realHeightCm, w.aspectRatio > 0 ? b.realWidthCm / w.aspectRatio : 250);
+    b.floorOffsetCm = Math.max(0, numOr(w.floorOffsetCm, 0));
     b.eyeLevelCm = numOr(w.eyeLevelCm, EYE_DEFAULT);
-    b.layout = (Array.isArray(w.layout) ? w.layout : []).map(i => ({
-      id: i.id || uid(), artId: i.artId, x: numOr(i.x, .5), y: numOr(i.y, .5) }));
-    b.savedLayouts = Array.isArray(w.savedLayouts) ? clone(w.savedLayouts) : [];
+    b.layout = items(w.layout);
+    b.savedLayouts = (Array.isArray(w.savedLayouts) ? w.savedLayouts : [])
+      .filter(l => l && typeof l.name === 'string')
+      .map(l => ({ name: l.name, items: items(l.items) }));
     // v1 stored guides in 0..1 wall space; v2 stores real centimetres.
     const g = w.guides || { h: [], v: [] };
-    b.guides.v = (Array.isArray(g.v) ? g.v : []).map(v =>
+    const nums = (list) => (Array.isArray(list) ? list : []).map(Number).filter(isFinite);
+    b.guides.v = nums(g.v).map(v =>
       (extra && extra.legacyGuides) ? v * b.realWidthCm : v);
-    b.guides.h = (Array.isArray(g.h) ? g.h : []).map(v =>
+    b.guides.h = nums(g.h).map(v =>
       (extra && extra.legacyGuides) ? b.floorOffsetCm + (1 - v) * b.realHeightCm : v);
     return b;
   };
 
   if (Array.isArray(raw.walls) && raw.walls.length) {
-    p.walls = raw.walls.map(w => mkWall(w));
+    p.walls = raw.walls.filter(w => w && typeof w === 'object').map(w => mkWall(w));
   } else if (raw.wall) {
     const legacy = Object.assign({}, raw.wall, {
       layout: raw.layout, savedLayouts: raw.savedLayouts, guides: raw.guides
     });
     p.walls = [mkWall(legacy, { name: 'My wall', legacyGuides: true })];
   }
+  // A wall with no photo cannot be drawn or recalibrated into existence.
+  p.walls = p.walls.filter(w => w.imageSrc);
   p.activeWallId = (p.walls.find(w => w.id === raw.activeWallId) || p.walls[0] || {}).id || null;
   return p;
 }
 
-/* ---- undo: geometry only, which keeps snapshots tiny ---- */
+/* ---- undo: measurements only, never pictures, which keeps snapshots tiny.
+   Anything that swaps a photo (recalibrating a wall, deleting an artwork)
+   clears the history instead, so an undo can never pair old numbers with a
+   new image. ---- */
 const history = { past: [], future: [] };
 function snapshot() {
   return JSON.stringify({
-    w: project.walls.map(w => ({ i: w.id, l: w.layout, g: w.guides })),
+    w: project.walls.map(w => ({ i: w.id, l: w.layout, g: w.guides, n: w.name, rw: w.realWidthCm,
+                                 rh: w.realHeightCm, fo: w.floorOffsetCm, e: w.eyeLevelCm })),
     a: project.inventory.map(a => ({ i: a.id, n: a.name, w: a.realWidthCm, h: a.realHeightCm,
-                                     f: a.frame, d: a.hangerDropCm })),
+                                     f: a.frame, d: a.hangerDropCm, s: a.shape, c: a.color })),
     s: selection
   });
 }
@@ -1087,12 +1209,15 @@ function applySnapshot(str) {
   const s = JSON.parse(str);
   s.w.forEach(sw => {
     const w = project.walls.find(x => x.id === sw.i);
-    if (w) { w.layout = sw.l; w.guides = sw.g; }
+    if (!w) return;
+    w.layout = sw.l.filter(i => art(i.artId)); w.guides = sw.g;
+    w.name = sw.n; w.realWidthCm = sw.rw; w.realHeightCm = sw.rh;
+    w.floorOffsetCm = sw.fo; w.eyeLevelCm = sw.e;
   });
   s.a.forEach(sa => {
     const a = art(sa.i);
     if (a) { a.name = sa.n; a.realWidthCm = sa.w; a.realHeightCm = sa.h;
-             a.frame = sa.f; a.hangerDropCm = sa.d; }
+             a.frame = sa.f; a.hangerDropCm = sa.d; a.shape = sa.s; a.color = sa.c; }
   });
   selection = s.s.filter(id => (wall() ? wall().layout.some(i => i.id === id) : false));
 }
@@ -1125,24 +1250,37 @@ function redo() {
 
 /* ---- storage ---- */
 function signature() {
-  return JSON.stringify({ n: project.name, u: project.units,
+  return JSON.stringify({ n: project.name, u: project.units, p: project.palette,
     w: project.walls.map(w => [w.id, w.name, w.corners, w.realWidthCm, w.realHeightCm,
                                w.floorOffsetCm, w.eyeLevelCm, w.layout, w.guides,
                                w.savedLayouts, (w.imageSrc || '').length]),
     a: project.inventory.map(a => [a.id, a.name, a.realWidthCm, a.realHeightCm, a.frame,
-                                   a.hangerDropCm, (a.imageSrc || '').length]) });
+                                   a.hangerDropCm, a.shape, a.color, (a.imageSrc || '').length]) });
 }
 let savedSig = signature();
 const markSaved = () => { savedSig = signature(); };
 const isDirty = () => signature() !== savedSig;
 
+const readMeta = () => {
+  try { return JSON.parse(localStorage.getItem(META_KEY) || 'null'); } catch (e) { return null; }
+};
 function saveSession() {
+  if (!project.walls.length) return;   // nothing to keep, and it would bury a real session
+  // The browser holds one session. Saving a different project over it is fine,
+  // but not silently.
+  const held = readMeta();
+  if (held && held.id && held.id !== project.id &&
+      !confirm('This browser already holds a different saved project' +
+        (held.name && held.name !== 'Untitled' ? ' ("' + held.name + '")' : '') +
+        '. Saving will replace it.\n\nIf you still want that one, cancel, open it and use ' +
+        'Export ▸ Project file first.')) return;
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify(project));
-    localStorage.setItem(META_KEY, JSON.stringify({
+    localStorage.setItem(META_KEY, JSON.stringify({ id: project.id,
       at: Date.now(), walls: project.walls.length, pieces: project.inventory.length,
       hung: project.walls.reduce((n, w) => n + w.layout.length, 0), name: project.name }));
     markSaved();
+    updateTopbar();
     toast('Saved in this browser.');
   } catch (e) {
     alert('There is not enough room in browser storage for this project — photos are big.\n\n' +
@@ -1150,19 +1288,23 @@ function saveSession() {
   }
 }
 function loadSession() {
-  const raw = localStorage.getItem(STORE_KEY);
+  let raw = null;
+  try { raw = localStorage.getItem(STORE_KEY); } catch (e) { /* storage is switched off */ }
   if (!raw) { toast('No saved session in this browser yet.'); return false; }
-  try { project = normalizeProject(JSON.parse(raw)); }
-  catch (e) { alert('That saved session could not be read, sorry.'); return false; }
+  try {
+    const p = normalizeProject(JSON.parse(raw));
+    if (!p.walls.length) throw new Error('no walls');
+    project = p;
+  } catch (e) { alert('That saved session could not be read, sorry.'); return false; }
   return true;
 }
 function exportProject() {
   const blob = new Blob([JSON.stringify(project)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-  const safe = (project.name || 'picture-this').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-  downloadURL(url, safe + '.json');
+  downloadURL(url, fileStem(project.name === 'Untitled' ? '' : project.name, 'picture-this') + '.json');
   setTimeout(() => URL.revokeObjectURL(url), 5000);
   markSaved();
+  updateTopbar();
   toast('Project file downloaded.');
 }
 
@@ -1249,8 +1391,8 @@ function CornerSelector(host, loupeEl, opts) {
 
   stage.addEventListener('click', (e) => {
     if (!pickMode || !opts.onColorPick) return;
-    const hex = sample(e.clientX, e.clientY);
-    if (hex) opts.onColorPick(hex);
+    const hit = sample(e.clientX, e.clientY);
+    if (hit) opts.onColorPick(hit.hex, hit);
   });
 
   function sample(cx, cy) {
@@ -1266,7 +1408,9 @@ function CornerSelector(host, loupeEl, opts) {
     if (px < 0 || py < 0 || px >= sampler.width || py >= sampler.height) return null;
     const d = sampler.getContext('2d').getImageData(px, py, 1, 1).data;
     const hx = n => n.toString(16).padStart(2, '0');
-    return '#' + hx(d[0]) + hx(d[1]) + hx(d[2]);
+    // x and y are fractions of the photo, for callers that care where as well as what
+    return { hex: '#' + hx(d[0]) + hx(d[1]) + hx(d[2]), alpha: d[3],
+             x: (px + .5) / sampler.width, y: (py + .5) / sampler.height };
   }
 
   function paint() {
@@ -1314,16 +1458,23 @@ const WallSheet = (function () {
     if (!w) draft.name = 'Wall ' + (project.walls.length + 1);
     imageSrc = draft.imageSrc || '';
     guessed = !w;
+    setPick(false);
     $('#ws-title').textContent = w ? 'Edit ' + w.name : 'Set up a wall';
     $('#ws-name').value = draft.name;
     setUnitLabels(el);
     $('#ws-w').value = Units.input(draft.realWidthCm);
     $('#ws-h').value = Units.input(draft.realHeightCm);
     $('#ws-floor').value = Units.input(draft.floorOffsetCm);
+    heightNote();
     el.classList.remove('hidden');
     if (imageSrc) mount(); else showDrop();
   }
   function close() { el.classList.add('hidden'); cs = null; }
+  function heightNote() {
+    $('#ws-h-note').textContent = guessed
+      ? 'Guessed from the angle of your photo. Type the real figure if you know it.'
+      : 'Using the figure you have. Clear it to go back to a guess.';
+  }
 
   function showDrop() {
     $('#ws-drop').classList.remove('hidden');
@@ -1392,7 +1543,10 @@ const WallSheet = (function () {
     await busy('Reading your photo…');
     try {
       imageSrc = await importPhoto(file, 2400);
+      draft.corners = blankWall().corners;   // the old corners belong to the old photo
       guessed = true;
+      heightNote();
+      setPick(false);
       mount();
     } catch (e) { alert('That image could not be read.'); }
     finally { unbusy(); }
@@ -1402,18 +1556,17 @@ const WallSheet = (function () {
     const W = Units.fromDisp(numOr($('#ws-w').value, 0));
     const Hh = Units.fromDisp(numOr($('#ws-h').value, 0));
     if (!(W > 0) || !(Hh > 0)) { alert('The wall needs a real width and height.'); return; }
-    commit(() => {
-      let w = editingId ? project.walls.find(x => x.id === editingId) : null;
-      if (!w) { w = blankWall(); project.walls.push(w); }
-      w.name = $('#ws-name').value.trim() || 'Wall';
-      w.imageSrc = imageSrc;
-      w.corners = cs.get();
-      w.realWidthCm = W;
-      w.realHeightCm = Hh;
-      w.floorOffsetCm = Math.max(0, Units.fromDisp(numOr($('#ws-floor').value, 0)));
-      project.activeWallId = w.id;
-      selection = [];
-    });
+    let w = editingId ? project.walls.find(x => x.id === editingId) : null;
+    if (!w) { w = blankWall(); project.walls.push(w); }
+    w.name = $('#ws-name').value.trim() || 'Wall';
+    w.imageSrc = imageSrc;
+    w.corners = cs.get();
+    w.realWidthCm = W;
+    w.realHeightCm = Hh;
+    w.floorOffsetCm = Math.max(0, Units.fromDisp(numOr($('#ws-floor').value, 0)));
+    project.activeWallId = w.id;
+    selection = [];
+    resetHistory();
     close();
     render();
   }
@@ -1422,19 +1575,28 @@ const WallSheet = (function () {
   $('#ws-drop').addEventListener('dragover', e => { e.preventDefault(); $('#ws-drop').classList.add('over'); });
   $('#ws-drop').addEventListener('dragleave', () => $('#ws-drop').classList.remove('over'));
   $('#ws-drop').addEventListener('drop', e => {
-    e.preventDefault(); $('#ws-drop').classList.remove('over');
+    e.preventDefault(); e.stopPropagation(); $('#ws-drop').classList.remove('over');
     chooseFile(e.dataTransfer.files[0]);
   });
+  $('#ws-replace').addEventListener('click', () => $('#ws-file').click());
   $('#ws-w').addEventListener('input', () => { guess(); grid(); });
-  $('#ws-h').addEventListener('input', () => { guessed = false; $('#ws-h-note').textContent =
-    'Using the figure you typed.'; grid(); });
+  $('#ws-h').addEventListener('input', () => {
+    if ($('#ws-h').value.trim()) { guessed = false; heightNote(); }
+    grid();
+  });
+  // Emptied and left: fall back to the guess. Not while typing, or the guess
+  // would land in the field under the next keystroke.
+  $('#ws-h').addEventListener('change', () => {
+    if ($('#ws-h').value.trim()) return;
+    guessed = true; heightNote(); guess(); grid();
+  });
   $('#ws-grid').addEventListener('change', grid);
   $('#ws-eye').addEventListener('click', () => setPick(!pick));
   $('#ws-save').addEventListener('click', save);
   $('#ws-cancel').addEventListener('click', () => {
     if (!project.walls.length) { close(); showStart(); } else close();
   });
-  return { open: open, close: close };
+  return { open, addFile: chooseFile };
 })();
 
 /* ---------- shared bits used by both editors ---------- */
@@ -1476,11 +1638,14 @@ function swatchRow(host, current, onPick) {
 
 // Frame and mat as an inline preview: content box + padding (mat) + border (frame).
 function styleMount(node, a, pxPerCm) {
+  const r = rim(a);
+  node.classList.toggle('round', a.shape === 'ellipse');
+  node.classList.toggle('free', a.shape === 'free');
   node.style.borderStyle = 'solid';
   node.style.borderColor = a.frame.frameColor;
-  node.style.borderWidth = (a.frame.frameWidthCm * pxPerCm) + 'px';
-  node.style.padding = (a.frame.matWidthCm * pxPerCm) + 'px';
-  node.style.background = a.frame.matColor;
+  node.style.borderWidth = (r.frame * pxPerCm) + 'px';
+  node.style.padding = (r.mat * pxPerCm) + 'px';
+  node.style.background = a.shape === 'free' ? 'transparent' : a.frame.matColor;
   node.style.width = (a.realWidthCm * pxPerCm) + 'px';
   node.style.height = (a.realHeightCm * pxPerCm) + 'px';
 }
@@ -1501,24 +1666,77 @@ const FRAME_PRESETS = [
 
 /* ---------- 4c. artwork editor ------------------------------------------- */
 
+// Clear a backdrop out of a flattened photo. Everything within `tol` of the
+// clicked colour goes, but only where it is connected to the click or to the
+// border of the image — so the white wall around a mirror is removed and the
+// white highlights inside it are not. Pixels just over the line on the boundary
+// are faded rather than cut, which takes the stair-steps off the edge.
+async function knockOut(src, seed, tol) {
+  const img = await loadImage(src);
+  const w = img.naturalWidth, h = img.naturalHeight, n = w * h;
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+  const id = ctx.getImageData(0, 0, w, h), px = id.data;
+  const sx = clamp(Math.floor(seed.x * w), 0, w - 1), sy = clamp(Math.floor(seed.y * h), 0, h - 1);
+  const s0 = (sy * w + sx) * 4;
+  if (px[s0 + 3] < 8) return null;            // that spot is already clear
+  const r0 = px[s0], g0 = px[s0 + 1], b0 = px[s0 + 2];
+  const t2 = tol * tol, soft = tol * 0.6;
+  const far2 = (i) => {
+    const p = i * 4;
+    if (px[p + 3] < 8) return 0;               // already clear: let the fill pass through
+    const dr = px[p] - r0, dg = px[p + 1] - g0, db = px[p + 2] - b0;
+    return dr * dr + dg * dg + db * db;
+  };
+  const gone = new Uint8Array(n), stack = new Int32Array(n);
+  let top = 0;
+  const push = (i) => { if (!gone[i] && far2(i) <= t2) { gone[i] = 1; stack[top++] = i; } };
+  push(sy * w + sx);
+  for (let x = 0; x < w; x++) { push(x); push((h - 1) * w + x); }
+  for (let y = 0; y < h; y++) { push(y * w); push(y * w + w - 1); }
+  while (top) {
+    const i = stack[--top], x = i % w;
+    if (x > 0) push(i - 1);
+    if (x < w - 1) push(i + 1);
+    if (i >= w) push(i - w);
+    if (i < n - w) push(i + w);
+  }
+  for (let i = 0; i < n; i++) {
+    const p = i * 4 + 3;
+    if (gone[i]) { px[p] = 0; continue; }
+    const x = i % w;
+    if (!((x > 0 && gone[i - 1]) || (x < w - 1 && gone[i + 1]) ||
+          (i >= w && gone[i - w]) || (i < n - w && gone[i + w]))) continue;
+    const over = Math.sqrt(far2(i)) - tol;
+    if (over < soft) px[p] = px[p] * Math.max(0, over) / soft;
+  }
+  ctx.putImageData(id, 0, 0);
+  return encodeWithAlpha(c);
+}
+
 const ArtSheet = (function () {
   const el = $('#sheet-art');
   let step = 'choose', editingId = null, source = null, processed = null;
   let blank = false, cs = null;
-  let d = null;   // the draft artwork
+  let d = null;     // the draft artwork
+  let key = null;   // the last background removal: { base, seed, tol }
 
-  function open(artId) {
+  function open(artId, file) {
     editingId = artId || null;
     const a = artId ? art(artId) : null;
-    d = a ? clone(a) : { id: uid(), name: 'Untitled', imageSrc: null, color: '#8d8a85',
+    d = a ? clone(a) : { id: uid(), name: 'Untitled', imageSrc: null, color: '#8d8a85', shape: 'rect',
       realWidthCm: 50, realHeightCm: 70, srcAspect: 50 / 70, hangerDropCm: 0,
       frame: { matColor: '#f4f1ea', matWidthCm: 0, frameColor: '#1a1a1a', frameWidthCm: 0 } };
     source = null;
     processed = d.imageSrc;
     blank = !!a && !a.imageSrc;
+    key = null;
+    $('#as-lock').checked = !blank;
     el.classList.remove('hidden');
     setUnitLabels(el);
-    if (a) { go('detail'); } else { go('choose'); }
+    go(a ? 'detail' : 'choose');
+    if (!a && file) chooseFile(file);
   }
   function close() { el.classList.add('hidden'); cs = null; }
 
@@ -1531,12 +1749,15 @@ const ArtSheet = (function () {
     $('#as-next').classList.toggle('hidden', next !== 'crop');
     $('#as-whole').classList.toggle('hidden', next !== 'crop');
     $('#as-save').classList.toggle('hidden', next !== 'detail');
-    $('#as-back').classList.toggle('hidden', !(next === 'detail' && source) && next !== 'pick');
+    $('#as-save').textContent = editingId ? 'Save changes' : 'Add to collection';
+    // On the detail step "back" means going round the crop again, so it says so.
+    $('#as-back').classList.toggle('hidden', next === 'choose' || (next === 'detail' && !source));
+    $('#as-back').textContent = next === 'detail' ? 'Re-crop' : 'Back';
     $('#as-title').textContent = editingId ? 'Edit artwork' : 'Add artwork';
     $('#as-step').textContent = { choose: 'Where should it come from?',
-      crop: 'Put the dots on the corners of the picture itself',
+      crop: 'Put the dots on its corners — for a round or irregular piece, the corners of the box it would just fit inside',
       pick: 'Click anywhere in the photo to take that colour',
-      detail: 'Real size, framing, and how it hangs' }[next] || '';
+      detail: 'Real size, shape, framing, and how it hangs' }[next] || '';
     if (next === 'detail') fillDetail();
   }
 
@@ -1544,7 +1765,13 @@ const ArtSheet = (function () {
     if (!file) return;
     await busy('Reading your photo…');
     try {
-      source = await importPhoto(file, 2000);
+      source = await importPhoto(file, 2000, true);
+      // A file called "blue-heron.jpg" is a better starting name than "Untitled";
+      // one called "IMG_2041.jpg" is not.
+      const stem = String(file.name || '').replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim();
+      if (!editingId && /^(Untitled|Blank panel)$/.test(d.name) && /[a-z]{3}/i.test(stem) &&
+          !/^(img|dsc|dscn|pxl|image|photo|screenshot|whatsapp image)?[\s\d.()at]*$/i.test(stem))
+        d.name = stem.slice(0, 60);
       mountCrop();
     } catch (e) { alert('That image could not be read.'); }
     finally { unbusy(); }
@@ -1554,49 +1781,84 @@ const ArtSheet = (function () {
     cs = CornerSelector($('#as-cs'), $('#as-loupe'), {
       imageSrc: source,
       corners: [{x:10,y:10},{x:90,y:10},{x:90,y:90},{x:10,y:90}],
-      tag: 'Drag the dots onto the corners of the artwork'
+      tag: 'Drag the dots onto the corners of the piece'
     });
     go('crop');
   }
 
   // Inverse-map each output pixel back into the photo, sampling bilinearly.
+  // Transparency in the source survives the trip, so a PNG with a clear
+  // background arrives as a cut-out without any further work.
   async function flatten(corners) {
     await busy('Straightening the photo…');
     try {
       const img = await loadImage(source);
-      const srcPts = corners.map(p => ({ x: p.x * img.width / 100, y: p.y * img.height / 100 }));
-      const aspect = (dist(srcPts[0], srcPts[1]) + dist(srcPts[3], srcPts[2])) /
-                     (dist(srcPts[0], srcPts[3]) + dist(srcPts[1], srcPts[2]));
-      if (!isFinite(aspect) || aspect <= 0) { alert('Those corners are too close together.'); return false; }
-      const w = 1100, h = Math.max(1, Math.round(w / aspect));
+      const sw = img.naturalWidth, sh = img.naturalHeight;
+      const srcPts = corners.map(p => ({ x: p.x * sw / 100, y: p.y * sh / 100 }));
+      const wide = (dist(srcPts[0], srcPts[1]) + dist(srcPts[3], srcPts[2])) / 2;
+      const tall = (dist(srcPts[0], srcPts[3]) + dist(srcPts[1], srcPts[2])) / 2;
+      const aspect = wide / tall;
+      if (!isFinite(aspect) || wide < 4 || tall < 4) { alert('Those corners are too close together.'); return false; }
+      // As many pixels as the crop really holds, within reason: inventing more
+      // only makes the project heavier to save.
+      let w = clamp(Math.round(wide), 240, 1100), h = Math.max(1, Math.round(w / aspect));
+      if (h > 2200) { h = 2200; w = Math.max(1, Math.round(h * aspect)); }
       const c = document.createElement('canvas'); c.width = w; c.height = h;
       const ctx = c.getContext('2d');
       const H = computeHomography([{x:0,y:0},{x:w,y:0},{x:w,y:h},{x:0,y:h}], srcPts);
       const tmp = document.createElement('canvas');
-      tmp.width = img.width; tmp.height = img.height;
-      tmp.getContext('2d').drawImage(img, 0, 0);
-      const sd = tmp.getContext('2d').getImageData(0, 0, img.width, img.height).data;
-      const sw = img.width, sh = img.height;
+      tmp.width = sw; tmp.height = sh;
+      const tctx = tmp.getContext('2d');
+      tctx.drawImage(img, 0, 0);
+      const clear = hasTransparency(tctx, sw, sh);
+      const sd = tctx.getImageData(0, 0, sw, sh).data;
       const out = ctx.createImageData(w, h), od = out.data;
       for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-        const den = H[6] * x + H[7] * y + H[8];
-        const u = (H[0] * x + H[1] * y + H[2]) / den, v = (H[3] * x + H[4] * y + H[5]) / den;
-        if (u < 0 || u >= sw - 1 || v < 0 || v >= sh - 1) continue;
-        const u0 = u | 0, v0 = v | 0, dx = u - u0, dy = v - v0;
-        const i00 = (v0 * sw + u0) * 4, i10 = i00 + 4, i01 = ((v0 + 1) * sw + u0) * 4, i11 = i01 + 4;
+        // pixel centres on both sides, clamped at the border rather than dropped
+        const cx = x + .5, cy = y + .5, den = H[6] * cx + H[7] * cy + H[8];
+        const u = clamp((H[0] * cx + H[1] * cy + H[2]) / den - .5, 0, sw - 1);
+        const v = clamp((H[3] * cx + H[4] * cy + H[5]) / den - .5, 0, sh - 1);
+        const u0 = u | 0, v0 = v | 0, u1 = Math.min(u0 + 1, sw - 1), v1 = Math.min(v0 + 1, sh - 1);
+        const dx = u - u0, dy = v - v0;
+        const i00 = (v0 * sw + u0) * 4, i10 = (v0 * sw + u1) * 4, i01 = (v1 * sw + u0) * 4, i11 = (v1 * sw + u1) * 4;
+        let w00 = (1 - dx) * (1 - dy), w10 = dx * (1 - dy), w01 = (1 - dx) * dy, w11 = dx * dy;
         const o = (y * w + x) * 4;
+        if (!clear) { od[o + 3] = 255; }
+        else {
+          // weight colour by coverage, or clear pixels bleed a dark fringe into the edge
+          w00 *= sd[i00 + 3]; w10 *= sd[i10 + 3]; w01 *= sd[i01 + 3]; w11 *= sd[i11 + 3];
+          const A = w00 + w10 + w01 + w11;
+          if (A <= 0) continue;
+          od[o + 3] = A;
+          w00 /= A; w10 /= A; w01 /= A; w11 /= A;
+        }
         for (let k = 0; k < 3; k++)
-          od[o + k] = sd[i00+k]*(1-dx)*(1-dy) + sd[i10+k]*dx*(1-dy) + sd[i01+k]*(1-dx)*dy + sd[i11+k]*dx*dy;
-        od[o + 3] = 255;
+          od[o + k] = sd[i00 + k] * w00 + sd[i10 + k] * w10 + sd[i01 + k] * w01 + sd[i11 + k] * w11;
       }
       ctx.putImageData(out, 0, 0);
-      processed = c.toDataURL('image/jpeg', 0.9);
+      const cut = clear && hasTransparency(ctx, w, h);
+      processed = cut ? encodeWithAlpha(c) : c.toDataURL('image/jpeg', 0.9);
       blank = false;
+      key = null;
+      if (cut && d.shape === 'rect') d.shape = 'free';
+      if (!cut && d.shape === 'free') d.shape = 'rect';
       d.srcAspect = aspect;
       d.realHeightCm = Math.round((d.realWidthCm / aspect) * 10) / 10;
+      $('#as-lock').checked = true;
       return true;
     } catch (e) { console.error(e); alert('Something went wrong straightening that photo.'); return false; }
     finally { unbusy(); }
+  }
+
+  async function removeBackground(base, seed, tol) {
+    await busy('Clearing the background…');
+    try {
+      const cleared = await knockOut(base, seed, tol);
+      if (!cleared) toast('That spot is already clear.');
+      else { processed = cleared; key = { base, seed, tol }; d.shape = 'free'; }
+    } catch (e) { console.error(e); alert('Something went wrong clearing that colour.'); }
+    finally { unbusy(); }
+    go('detail');
   }
 
   /* ---- detail step ---- */
@@ -1608,6 +1870,21 @@ const ArtSheet = (function () {
     $('#as-frame').value = Units.input(d.frame.frameWidthCm);
     $('#as-drop').value = Units.input(d.hangerDropCm);
     $('#as-panel-wrap').classList.toggle('hidden', !blank);
+    const free = d.shape === 'free';
+    $$('#as-shape button').forEach(b => b.classList.toggle('on', b.dataset.s === d.shape));
+    $('#as-shape [data-s=free]').classList.toggle('hidden', blank);   // nothing to cut out of
+    $('#as-shape-note').textContent = {
+      rect: '',
+      ellipse: 'A circle or oval filling the width and height above. The mat and frame follow the curve.',
+      free: 'Wherever the image is transparent, the wall shows through. The size above is the box ' +
+            'it just fits inside, and there is no mat or frame.'
+    }[d.shape];
+    $('#as-shape-note').classList.toggle('hidden', d.shape === 'rect');
+    $('#as-key').classList.toggle('hidden', !free || blank || !processed);
+    $('#as-key-more').classList.toggle('hidden', !key);
+    if (key) { $('#as-key-tol').value = key.tol; $('#as-key-tol-val').textContent = key.tol; }
+    $('#as-framing').classList.toggle('hidden', free);
+    $('#as-drop-lbl').textContent = free ? 'Hook drop from the top edge' : 'Hook drop from top of frame';
     $('#as-eye-mat').classList.toggle('hidden', !source && !processed);
     $('#as-eye-frame').classList.toggle('hidden', !source && !processed);
     swatchRow($('#as-mat-sw'), d.frame.matColor, c => { d.frame.matColor = c; fillDetail(); });
@@ -1656,19 +1933,22 @@ const ArtSheet = (function () {
     img.classList.toggle('hidden', blank);
     ph.classList.toggle('hidden', !blank);
     if (!blank && processed && img.getAttribute('src') !== processed) img.src = processed;
-    if (blank) { ph.style.background = d.color; ph.textContent = ''; }
+    if (blank) ph.style.background = d.color;
     const barCm = Units.isIn ? 30.48 : 50;
     $('#as-scale-ln').style.width = (barCm * pxPerCm) + 'px';
     $('#as-scale-lbl').textContent = Units.isIn ? '12"' : '50 cm';
   }
 
   function openPicker(target) {
-    const src = source || processed;
+    // Colours for a mat can come from anywhere in the original photo. A colour
+    // to clear has to be clicked on the flattened piece, where it will be cleared.
+    const src = target === 'key' ? processed : (source || processed);
     if (!src) return;
     cs = CornerSelector($('#as-cs'), null, {
       imageSrc: src, eyedropper: true,
-      tag: 'Click anywhere to take that colour',
-      onColorPick: (hex) => {
+      tag: target === 'key' ? 'Click the background you want cleared away' : 'Click anywhere to take that colour',
+      onColorPick: (hex, at) => {
+        if (target === 'key') { removeBackground(processed, { x: at.x, y: at.y }, key ? key.tol : 32); return; }
         if (target === 'mat') d.frame.matColor = hex;
         else if (target === 'frame') d.frame.frameColor = hex;
         addToPalette(hex);
@@ -1681,15 +1961,16 @@ const ArtSheet = (function () {
 
   function save() {
     d.name = $('#as-name').value.trim() || 'Untitled';
-    d.imageSrc = blank ? null : processed;
     if (!blank && !processed) { alert('This piece has no picture yet.'); return; }
-    commit(() => {
-      const i = project.inventory.findIndex(a => a.id === d.id);
-      if (i >= 0) project.inventory[i] = clone(d); else project.inventory.push(clone(d));
-    });
+    d.imageSrc = blank ? null : processed;
+    if (blank && d.shape === 'free') d.shape = 'rect';
+    const i = project.inventory.findIndex(a => a.id === d.id);
+    // A new piece is not on any wall yet, so there is nothing for undo to step back to.
+    if (i >= 0) commit(() => { project.inventory[i] = clone(d); });
+    else project.inventory.push(clone(d));
     close();
     render();
-    toast(editingId ? 'Artwork updated.' : d.name + ' added to your collection.');
+    toast(editingId ? 'Artwork updated.' : d.name + ' is in your collection — drag it onto the wall.');
   }
 
   /* wiring */
@@ -1712,8 +1993,23 @@ const ArtSheet = (function () {
   $('#as-name').addEventListener('input', () => { d.name = $('#as-name').value; });
   $('#as-file').addEventListener('change', e => { chooseFile(e.target.files[0]); e.target.value = ''; });
   $('#as-replace').addEventListener('click', () => $('#as-file').click());
+  $$('#as-shape button').forEach(b => b.addEventListener('click', () => {
+    d.shape = b.dataset.s;
+    fillDetail();
+  }));
+  $('#as-key-pick').addEventListener('click', () => openPicker('key'));
+  $('#as-key-tol').addEventListener('input', () => { $('#as-key-tol-val').textContent = $('#as-key-tol').value; });
+  $('#as-key-tol').addEventListener('change', () => {
+    if (key) removeBackground(key.base, key.seed, numOr($('#as-key-tol').value, key.tol));
+  });
+  $('#as-key-undo').addEventListener('click', () => {
+    if (!key) return;
+    processed = key.base; key = null;
+    fillDetail();
+  });
   $('#as-blank').addEventListener('click', () => {
-    blank = true; processed = null; source = null;
+    blank = true; processed = null; source = null; key = null;
+    if (d.shape === 'free') d.shape = 'rect';
     d.name = 'Blank panel'; d.srcAspect = d.realWidthCm / d.realHeightCm;
     $('#as-lock').checked = false;
     go('detail');
@@ -1725,7 +2021,9 @@ const ArtSheet = (function () {
     if (await flatten([{x:0,y:0},{x:100,y:0},{x:100,y:100},{x:0,y:100}])) go('detail');
   });
   $('#as-back').addEventListener('click', () => {
-    if (step === 'pick') go('detail'); else mountCrop();
+    if (step === 'detail') mountCrop();
+    else if (step === 'pick' || processed || blank) go('detail');
+    else go('choose');
   });
   $('#as-eye-mat').addEventListener('click', () => openPicker('mat'));
   $('#as-eye-frame').addEventListener('click', () => openPicker('frame'));
@@ -1733,7 +2031,9 @@ const ArtSheet = (function () {
   $('#as-cancel').addEventListener('click', close);
   window.addEventListener('resize', () => { if (!el.classList.contains('hidden') && step === 'detail') drawPreview(); });
 
-  return { open: open, close: close };
+  return { open, addFile: chooseFile,
+    // Escape steps out of the eyedropper; anything more would throw work away.
+    escape() { if (step === 'pick') { go('detail'); return true; } return false; } };
 })();
 
 /* ---------- 5. the wall canvas -------------------------------------------
@@ -1833,7 +2133,9 @@ const Canvas = (function () {
       n.mount.style.width = ''; n.mount.style.height = '';   // fill the projected box
       n.mount.style.position = 'absolute';
       n.mount.style.inset = '0';
-      n.mount.style.boxShadow = (0.4 * k) + 'px ' + (0.7 * k) + 'px ' + (1.6 * k) + 'px rgba(0,0,0,.55)';
+      const shadow = (0.4 * k) + 'px ' + (0.7 * k) + 'px ' + (1.6 * k) + 'px rgba(0,0,0,.55)';
+      n.mount.style.boxShadow = shadow;
+      n.img.style.filter = a.shape === 'free' ? 'drop-shadow(' + shadow + ')' : '';
       const isBlank = !a.imageSrc;
       n.img.classList.toggle('hidden', isBlank);
       n.ph.classList.toggle('hidden', !isBlank);
@@ -1863,13 +2165,15 @@ const Canvas = (function () {
 
     if (project.show.ruler) {
       const g = svgEl('g', { 'stroke-linecap': 'round' }, svg);
-      // ticks up the left edge, every 25cm, labelled every 50
-      for (let h = Math.ceil(w.floorOffsetCm / 25) * 25; h <= top + .01; h += 25) {
-        const a = p.cm(0, h), b = p.cm(w.realWidthCm * (h % 50 ? .012 : .022), h);
+      // ticks up the left edge: every 25 cm labelled every 50, or every 6" labelled every foot
+      const tick = Units.isIn ? IN * 6 : 25;
+      for (let i = Math.ceil(w.floorOffsetCm / tick - 1e-6); i * tick <= top + .01; i++) {
+        const h = i * tick, minor = i % 2 !== 0;
+        const a = p.cm(0, h), b = p.cm(w.realWidthCm * (minor ? .012 : .022), h);
         if (!a || !b) continue;
         svgEl('line', { x1: a.x, y1: a.y, x2: b.x, y2: b.y,
-          stroke: 'rgba(255,255,255,.5)', 'stroke-width': h % 50 ? .8 : 1.4 }, g);
-        if (h % 50 === 0)
+          stroke: 'rgba(255,255,255,.5)', 'stroke-width': minor ? .8 : 1.4 }, g);
+        if (!minor)
           svgEl('text', Object.assign({ x: b.x + 5, y: b.y + 3.5, fill: 'rgba(255,255,255,.78)',
             'font-size': 10 }, HALO), g).textContent = Units.fmt(h, false);
       }
@@ -1984,13 +2288,12 @@ const Canvas = (function () {
     if (bx) { x = bx.val; lines.push({ axis: 'v', at: bx.at }); }
     const by = best(y, [-hh, 0, hh], hT);
     if (by) { y = by.val; lines.push({ axis: 'h', at: by.at }); }
-    if (project.snap.grid) { if (!bx) x = Math.round(x); if (!by) y = Math.round(y); }
+    if (project.snap.grid) {
+      const g = Units.grid();
+      if (!bx) x = Math.round(x / g) * g;
+      if (!by) y = Math.round(y / g) * g;
+    }
     return { x: x, y: y, lines: lines };
-  }
-
-  function setAt(w, item, xCm, yCm) {
-    const uv = toUV(w, xCm, yCm);
-    item.x = uv.x; item.y = uv.y;
   }
 
   /* ---- dragging pieces ---- */
@@ -1998,7 +2301,6 @@ const Canvas = (function () {
   function grabPiece(e, id) {
     if (e.button === 2) return;
     e.preventDefault(); e.stopPropagation();
-    const w = wall();
     if (e.shiftKey) {
       const i = selection.indexOf(id);
       if (i >= 0) selection.splice(i, 1); else selection.push(id);
@@ -2022,7 +2324,8 @@ const Canvas = (function () {
              // clicking one of several selected pieces, without dragging, singles it out
              isolate: (!follow && ids.length > 1) ? primary : null };
     window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp, { once: true });
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);   // a touch the browser took over
     render();
   }
 
@@ -2046,8 +2349,8 @@ const Canvas = (function () {
     w.layout.forEach(it => {
       if (drag.ids.indexOf(it.id) < 0) return;
       const o = drag.orig.get(it.id);
-      if (drag.follow) setAt(w, it, s.x, s.y);
-      else setAt(w, it, o.x + dx, o.y + dy);
+      if (drag.follow) moveTo(w, it, s.x, s.y);
+      else moveTo(w, it, o.x + dx, o.y + dy);
     });
 
     const p = projector();
@@ -2057,6 +2360,8 @@ const Canvas = (function () {
 
   function onUp() {
     window.removeEventListener('pointermove', onMove);
+    window.removeEventListener('pointerup', onUp);
+    window.removeEventListener('pointercancel', onUp);
     snapLines = [];
     hud.classList.add('hidden');
     const moved = drag && drag.moved;
@@ -2098,10 +2403,13 @@ const Canvas = (function () {
     };
     const up = () => {
       window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
       if (moved) commit(); else pending = null;
     };
     window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up, { once: true });
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
   }
 
   /* ---- placing from the collection ---- */
@@ -2113,7 +2421,7 @@ const Canvas = (function () {
     const before = snapshot();
     const item = { id: uid(), artId: artId, x: .5, y: .5 };
     // drop it at eye level by default — that is where it almost always belongs
-    setAt(w, item, w.realWidthCm / 2, w.eyeLevelCm);
+    moveTo(w, item, w.realWidthCm / 2, w.eyeLevelCm);
     w.layout.push(item);
     selection = [item.id];
     render();
@@ -2139,8 +2447,7 @@ const Canvas = (function () {
   window.addEventListener('resize', draw);
   if (window.ResizeObserver) new ResizeObserver(() => draw()).observe(stage);
 
-  return { render: draw, place, measure, pointToCm, projector, pxPerCm,
-           get rect() { return rect; } };
+  return { render: draw, place };
 })();
 
 /* ---------- 6a. layout commands ------------------------------------------ */
@@ -2238,7 +2545,8 @@ const Rail = (function () {
       const im = document.createElement('img'); im.src = a.imageSrc; mount.appendChild(im);
     } else {
       const ph = document.createElement('div');
-      ph.style.cssText = 'width:100%;height:100%;background:' + (a.color || '#8d8a85');
+      ph.className = 'ph';
+      ph.style.background = a.color || '#8d8a85';
       mount.appendChild(ph);
     }
     return mount;
@@ -2263,7 +2571,7 @@ const Rail = (function () {
     list.forEach(a => {
       const card = document.createElement('div');
       card.className = 'piece' + (used[a.id] ? ' used' : '');
-      card.title = 'Drag onto the wall';
+      card.title = 'Drag onto the wall, or click to hang it at eye level';
       const art_ = document.createElement('div');
       art_.className = 'piece-art';
       art_.appendChild(thumb(a, 64));
@@ -2283,11 +2591,17 @@ const Rail = (function () {
         b.className = 'piece-count'; b.textContent = used[a.id];
         card.appendChild(b);
       }
+      // A mouse drags straight out of the rail. A finger has to be allowed to
+      // scroll the rail instead, so on touch a piece is hung with a tap.
+      let byTouch = false;
       card.addEventListener('pointerdown', (e) => {
-        if (e.target.closest('.piece-tools')) return;
+        byTouch = e.pointerType === 'touch';
+        if (byTouch || e.button !== 0 || e.target.closest('.piece-tools')) return;
         e.preventDefault();
-        if (!wall()) { toast('Set up a wall first.'); return; }
         Canvas.place(a.id, e);
+      });
+      card.addEventListener('click', (e) => {
+        if (byTouch && !e.target.closest('.piece-tools')) Canvas.place(a.id, null);
       });
       $('[data-t=edit]', tools).addEventListener('click', () => ArtSheet.open(a.id));
       $('[data-t=del]', tools).addEventListener('click', () => {
@@ -2295,14 +2609,14 @@ const Rail = (function () {
         if (!confirm('Delete "' + a.name + '" from your collection?' +
             (hung ? '\n\nIt is hanging in ' + hung + ' place' + (hung > 1 ? 's' : '') + ' and will come down.' : '')))
           return;
-        commit(() => {
-          project.inventory = project.inventory.filter(x => x.id !== a.id);
-          project.walls.forEach(w2 => {
-            w2.layout = w2.layout.filter(i => i.artId !== a.id);
-            w2.savedLayouts.forEach(l => { l.items = l.items.filter(i => i.artId !== a.id); });
-          });
-          selection = [];
+        project.inventory = project.inventory.filter(x => x.id !== a.id);
+        project.walls.forEach(w2 => {
+          w2.layout = w2.layout.filter(i => i.artId !== a.id);
+          w2.savedLayouts.forEach(l => { l.items = l.items.filter(i => i.artId !== a.id); });
         });
+        selection = [];
+        resetHistory();   // older snapshots still point at the piece that just went
+        refresh();
       });
       host.appendChild(card);
     });
@@ -2334,9 +2648,11 @@ const Inspector = (function () {
     const first = items[0], a = art(first.artId);
     if (!a) { selection = []; render(); return; }
     $('#ip-title').textContent = multi ? items.length + ' pieces selected' : a.name;
+    const free = a.shape === 'free', r = rim(a);
     $('#ip-sub').textContent = multi
       ? 'Line them up, or space them evenly'
-      : Units.fmt(outer(a).w, false) + ' × ' + Units.fmt(outer(a).h) + ' including the frame';
+      : Units.fmt(outer(a).w, false) + ' × ' + Units.fmt(outer(a).h) +
+        (r.frame + r.mat > 0 ? ' including the frame' : a.shape === 'ellipse' ? ' · round' : free ? ' · cut-out' : '');
 
     const c = toCm(w, first);
     setVal('#ip-x', multi ? '' : Units.input(c.x));
@@ -2347,7 +2663,7 @@ const Inspector = (function () {
       const o = outer(a);
       const rows = [
         ['Left edge', Units.fmt(c.x - o.w / 2)],
-        ['Top of frame', Units.fmt(c.y + o.h / 2)],
+        [free ? 'Top edge' : 'Top of frame', Units.fmt(c.y + o.h / 2)],
         ['Nail height', Units.fmt(c.y + o.h / 2 - a.hangerDropCm)]
       ];
       $('#ip-readout').innerHTML = rows.map(r =>
@@ -2359,6 +2675,8 @@ const Inspector = (function () {
       setVal('#ip-mat', Units.input(a.frame.matWidthCm));
       setVal('#ip-frame', Units.input(a.frame.frameWidthCm));
       setVal('#ip-drop', Units.input(a.hangerDropCm));
+      $('#ip-framing').classList.toggle('hidden', free);
+      $('#ip-drop-lbl').textContent = free ? 'Hook drop from the top edge' : 'Hook drop from top of frame';
       swatchRow($('#ip-mat-sw'), a.frame.matColor, col =>
         commit(() => { a.frame.matColor = col; }));
       swatchRow($('#ip-frame-sw'), a.frame.frameColor, col =>
@@ -2383,6 +2701,8 @@ const Inspector = (function () {
     $('#sn-pieces').checked = project.snap.pieces;
     $('#sn-guides').checked = project.snap.guides;
     $('#sn-grid').checked = project.snap.grid;
+    $('#sn-grid-lbl').textContent = 'Snap to a ' + (Units.isIn ? 'half-inch' : '1 cm') + ' grid';
+    $('#iw-eye-note').textContent = 'Galleries hang centres at about ' + Units.fmt(EYE_DEFAULT) + '.';
     refreshGuides();
     const rows = Plan.rows();
     $('#iw-plan').innerHTML = rows.length
@@ -2402,7 +2722,7 @@ const Inspector = (function () {
       row.className = 'guide-row';
       row.innerHTML = '<span class="tag">' + (axis === 'v' ? 'V' : 'H') + '</span>' +
         '<div class="unit-in grow"><input type="number" step="0.5"><span class="u">' + Units.label() + '</span></div>' +
-        '<button class="btn icon sm ghost"><svg class="i sm"><use href="#s-x"/></svg></button>';
+        '<button class="btn icon sm ghost" title="Remove this guide"><svg class="i sm"><use href="#s-x"/></svg></button>';
       const inp = $('input', row);
       if (document.activeElement !== inp) inp.value = Units.input(val);
       inp.addEventListener('change', () => commit(() => {
@@ -2430,7 +2750,12 @@ const Inspector = (function () {
   const onPos = () => {
     const w = wall(), items = selectedItems();
     if (items.length !== 1) return;
-    commit(() => moveTo(w, items[0], readCm('#ip-x'), readCm('#ip-y')));
+    // an emptied field means "leave it where it is", not "send it to zero"
+    const c = toCm(w, items[0]);
+    const x = Units.fromDisp(numOr($('#ip-x').value, Units.toDisp(c.x)));
+    const y = Units.fromDisp(numOr($('#ip-y').value, Units.toDisp(c.y)));
+    commit(() => moveTo(w, items[0], x, y));
+    refresh();
   };
   $('#ip-x').addEventListener('change', onPos);
   $('#ip-y').addEventListener('change', onPos);
@@ -2492,7 +2817,7 @@ const Inspector = (function () {
   const wallField = (sel, apply) => $(sel).addEventListener('change', () => {
     const w = wall(); if (!w) return;
     commit(() => apply(w));
-    render();
+    refresh();
   });
   wallField('#iw-name', w => { w.name = $('#iw-name').value.trim() || w.name; });
   wallField('#iw-w', w => { w.realWidthCm = Math.max(10, readCm('#iw-w', 10)); });
@@ -2507,8 +2832,8 @@ const Inspector = (function () {
     project.walls = project.walls.filter(x => x.id !== w.id);
     project.activeWallId = project.walls[0].id;
     selection = [];
-    history.past.length = 0; history.future.length = 0;
-    render();
+    resetHistory();
+    refresh();
   });
   ['pieces', 'guides', 'grid'].forEach(k =>
     $('#sn-' + k).addEventListener('change', e => { project.snap[k] = e.target.checked; }));
@@ -2588,10 +2913,8 @@ const Plan = (function () {
       const c = toCm(w, it), o = outer(a);
       return { _x: c.x, _y: c.y, name: a.name,
         size: Units.fmt(o.w, false) + ' × ' + Units.fmt(o.h),
-        across: Units.fmt(c.x), left: Units.fmt(c.x - o.w / 2),
-        centre: Units.fmt(c.y), top: Units.fmt(c.y + o.h / 2),
-        hook: Units.fmt(c.y + o.h / 2 - a.hangerDropCm),
-        drop: a.hangerDropCm };
+        across: Units.fmt(c.x), centre: Units.fmt(c.y),
+        hook: Units.fmt(c.y + o.h / 2 - a.hangerDropCm) };
     }).filter(Boolean).sort((p, q) => p._x - q._x || q._y - p._y);
   }
 
@@ -2614,8 +2937,9 @@ const Plan = (function () {
   }
 
   function open() {
-    const w = wall();
-    $('#pl-sub').textContent = w.name + ' — ' + rows().length + ' pieces';
+    const w = wall(), n = rows().length;
+    if (!w || !n) { toast('Hang something first — the plan is the measurements for what is on the wall.'); return; }
+    $('#pl-sub').textContent = w.name + ' — ' + n + ' piece' + (n === 1 ? '' : 's');
     $('#pl-body').innerHTML =
       '<h2 class="plan-h">' + esc(w.name) + '</h2>' +
       '<p class="plan-sub">Every height is measured up from the floor. Every across figure is measured ' +
@@ -2624,8 +2948,9 @@ const Plan = (function () {
       '<div class="plan-img-wait" id="pl-img">Drawing the wall…</div>' +
       tableHTML() +
       '<div class="plan-note"><b>Working from a wire?</b> The nail height already allows for the drop ' +
-      'you entered for each piece. Where the drop is zero the figure is the top of the frame, which is ' +
-      'right for a flush hanger such as a D-ring or a keyhole.</div>';
+      'you entered for each piece. Where the drop is zero the figure is the top edge of the piece, which ' +
+      'is right for a flush hanger such as a D-ring or a keyhole. Round and cut-out pieces are measured ' +
+      'by the box they just fit inside, so their centre is the centre of that box.</div>';
     $('#sheet-plan').classList.remove('hidden');
     // The picture takes a moment to render, so the numbers arrive first.
     Exports.composite(true).then(c => {
@@ -2650,18 +2975,22 @@ const Plan = (function () {
     let imgTag = '';
     try {
       const c = await Exports.composite(true);
-      imgTag = '<img src="' + c.toDataURL('image/jpeg', .8) + '">';
+      imgTag = '<img alt="" src="' + c.toDataURL('image/jpeg', .8) + '">';
     } catch (e) { /* the table alone is still useful */ }
-    unbusy();
     $('#printarea').innerHTML =
       '<h1>' + esc(w.name) + '</h1>' +
       '<p class="sub">Hanging plan · heights from the floor · across from the left edge of the ' +
       'calibrated area</p>' + imgTag + tableHTML('') +
       '<p class="note">Nail heights allow for the hook drop entered for each piece.</p>';
+    // Printing before the picture has decoded gives a page with a hole in it.
+    const pic = $('#printarea img');
+    if (pic && pic.decode) { try { await pic.decode(); } catch (e) { /* print without it */ } }
+    unbusy();
     window.print();
   });
 
-  return { rows, open, close, asText };
+  return { rows, open, close,
+    get isOpen() { return !$('#sheet-plan').classList.contains('hidden'); } };
 })();
 
 /* ---------- 7c. exports --------------------------------------------------- */
@@ -2686,6 +3015,12 @@ const Exports = (function () {
       return transformPoint(uv.x, uv.y, Hw);
     };
 
+    const pictures = new Map();   // a piece hung five times is decoded once
+    const picture = async (src) => {
+      if (!pictures.has(src)) pictures.set(src, await loadImage(src));
+      return pictures.get(src);
+    };
+
     for (const item of w.layout) {
       const a = art(item.artId);
       if (!a) continue;
@@ -2695,21 +3030,35 @@ const Exports = (function () {
       const dst = [[x0,y0],[x0+uw,y0],[x0+uw,y0+uh],[x0,y0+uh]]
         .map(q => transformPoint(q[0], q[1], Hw));
 
-      // paint the framed piece flat, then warp that texture onto the wall plane
-      const texW = 1200, texH = Math.max(1, Math.round(texW * (o.h / o.w)));
+      // Paint the piece flat, then warp that texture onto the wall plane. The
+      // texture is sized to the space it will fill, so the warp samples it
+      // close to one-to-one and curved edges stay smooth.
+      const across = Math.max(dist(dst[0], dst[1]), dist(dst[3], dst[2]));
+      const texW = clamp(Math.round(across * 1.25), 48, 2400);
+      const texH = Math.max(1, Math.round(texW * (o.h / o.w)));
       const tex = document.createElement('canvas');
       tex.width = texW; tex.height = texH;
       const tc = tex.getContext('2d');
-      const k = texW / o.w;
-      const f = a.frame.frameWidthCm * k, m = a.frame.matWidthCm * k;
-      tc.fillStyle = a.frame.frameColor; tc.fillRect(0, 0, texW, texH);
-      tc.fillStyle = a.frame.matColor; tc.fillRect(f, f, texW - f * 2, texH - f * 2);
-      if (a.imageSrc) {
-        const im = await loadImage(a.imageSrc);
-        tc.drawImage(im, f + m, f + m, texW - (f + m) * 2, texH - (f + m) * 2);
+      const k = texW / o.w, r = rim(a);
+      const f = r.frame * k, m = r.mat * k;
+      const im = a.imageSrc ? await picture(a.imageSrc) : null;
+      if (a.shape === 'free') {
+        if (im) tc.drawImage(im, 0, 0, texW, texH);
       } else {
-        tc.fillStyle = a.color || '#8d8a85';
-        tc.fillRect(f + m, f + m, texW - (f + m) * 2, texH - (f + m) * 2);
+        // the outline of the piece, pulled in by `inset` on every side
+        const outline = (inset) => {
+          tc.beginPath();
+          if (a.shape === 'ellipse')
+            tc.ellipse(texW / 2, texH / 2, Math.max(0, texW / 2 - inset), Math.max(0, texH / 2 - inset), 0, 0, Math.PI * 2);
+          else tc.rect(inset, inset, Math.max(0, texW - inset * 2), Math.max(0, texH - inset * 2));
+        };
+        if (f > 0) { outline(0); tc.fillStyle = a.frame.frameColor; tc.fill(); }
+        if (m > 0) { outline(f); tc.fillStyle = a.frame.matColor; tc.fill(); }
+        tc.save();
+        outline(f + m); tc.clip();
+        if (im) tc.drawImage(im, f + m, f + m, texW - (f + m) * 2, texH - (f + m) * 2);
+        else { tc.fillStyle = a.color || '#8d8a85'; tc.fillRect(0, 0, texW, texH); }
+        tc.restore();
       }
       const td = tc.getImageData(0, 0, texW, texH).data;
 
@@ -2726,13 +3075,27 @@ const Exports = (function () {
       const inv = computeHomography(dst, [{x:0,y:0},{x:texW,y:0},{x:texW,y:texH},{x:0,y:texH}]);
       const out = ctx.getImageData(minX, minY, dw, dh), od = out.data;
       for (let y = 0; y < dh; y++) for (let x = 0; x < dw; x++) {
-        const gx = x + minX, gy = y + minY;
+        const gx = x + minX + .5, gy = y + minY + .5;
         const den = inv[6] * gx + inv[7] * gy + inv[8];
-        const u = (inv[0] * gx + inv[1] * gy + inv[2]) / den;
-        const v = (inv[3] * gx + inv[4] * gy + inv[5]) / den;
-        if (u < 0 || u >= texW || v < 0 || v >= texH) continue;
-        const t = ((v | 0) * texW + (u | 0)) * 4, d = (y * dw + x) * 4;
-        od[d] = td[t]; od[d+1] = td[t+1]; od[d+2] = td[t+2]; od[d+3] = 255;
+        const u = (inv[0] * gx + inv[1] * gy + inv[2]) / den - .5;
+        const v = (inv[3] * gx + inv[4] * gy + inv[5]) / den - .5;
+        if (u < -.5 || u > texW - .5 || v < -.5 || v > texH - .5) continue;
+        // Bilinear, weighted by coverage, then laid over the wall: a round or
+        // cut-out piece has to blend at its edge rather than punch a box out.
+        const uc = clamp(u, 0, texW - 1), vc = clamp(v, 0, texH - 1);
+        const u0 = uc | 0, v0 = vc | 0, u1 = Math.min(u0 + 1, texW - 1), v1 = Math.min(v0 + 1, texH - 1);
+        const fx = uc - u0, fy = vc - v0;
+        const i00 = (v0 * texW + u0) * 4, i10 = (v0 * texW + u1) * 4, i01 = (v1 * texW + u0) * 4, i11 = (v1 * texW + u1) * 4;
+        const w00 = (1 - fx) * (1 - fy) * td[i00 + 3], w10 = fx * (1 - fy) * td[i10 + 3],
+              w01 = (1 - fx) * fy * td[i01 + 3], w11 = fx * fy * td[i11 + 3];
+        const A = w00 + w10 + w01 + w11;
+        if (A <= 0) continue;
+        const cover = A / 255, d = (y * dw + x) * 4;
+        for (let c2 = 0; c2 < 3; c2++) {
+          const col = (td[i00 + c2] * w00 + td[i10 + c2] * w10 + td[i01 + c2] * w01 + td[i11 + c2] * w11) / A;
+          od[d + c2] = od[d + c2] * (1 - cover) + col * cover;
+        }
+        od[d + 3] = 255;
       }
       ctx.putImageData(out, minX, minY);
     }
@@ -2794,8 +3157,7 @@ const Exports = (function () {
     await busy('Rendering your wall…');
     try {
       const c = await composite(annotate);
-      const safe = w.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'wall';
-      await downloadCanvas(c, safe + (annotate ? '-with-measurements' : '') + '.jpg');
+      await downloadCanvas(c, fileStem(w.name, 'wall') + (annotate ? '-with-measurements' : '') + '.jpg');
       toast('Image saved.');
     } catch (e) { console.error(e); alert('The export failed, sorry.'); }
     finally { unbusy(); }
@@ -2823,11 +3185,18 @@ function updateTopbar() {
     sel.appendChild(o);
   });
   if (w) sel.value = w.id;
+  const pn = $('#proj-name');
+  if (document.activeElement !== pn) pn.value = project.name === 'Untitled' ? '' : project.name;
+  $('#btn-save').classList.toggle('dirty', isDirty());
   $('#btn-undo').disabled = !history.past.length;
   $('#btn-redo').disabled = !history.future.length;
   $$('#units button').forEach(b => b.classList.toggle('on', b.dataset.u === project.units));
 }
 
+// The rail, the inspector and the arrangements list each have a render() of
+// their own, which hides this one inside them. refresh() is the name that
+// always means the whole page.
+function refresh() { render(); }
 function render() {
   if (!project.walls.length) return;
   updateTopbar();
@@ -2836,19 +3205,31 @@ function render() {
   Canvas.render();
   Inspector.render();
   Arrangements.render();
+  // An empty wall should say what to do next.
+  const w = wall(), hint = $('#hint');
+  hint.textContent = project.inventory.length
+    ? 'Drag a piece across from your collection to hang it'
+    : 'Add an artwork — or a blank panel at a size you are considering';
+  hint.classList.toggle('hidden', !w || w.layout.length > 0);
 }
 
 function showStart() {
   $('#app').classList.add('hidden');
   $('#start').classList.remove('hidden');
-  let meta = null;
-  try { meta = JSON.parse(localStorage.getItem(META_KEY) || 'null'); } catch (e) {}
+  // With a project already open, the way back to it comes first.
+  const open = project.walls.length > 0;
+  $('#go-back').classList.toggle('hidden', !open);
+  if (open) $('#back-meta').textContent = (project.name !== 'Untitled' ? project.name + ' — ' : '') +
+    project.walls.length + ' wall' + (project.walls.length === 1 ? '' : 's') +
+    (isDirty() ? ' · with changes not yet saved' : '');
+  const meta = readMeta();
   const p = $('#continue-meta');
   if (meta) {
     const days = Math.floor((Date.now() - meta.at) / 864e5);
     const when = days === 0 ? 'today' : days === 1 ? 'yesterday' : days + ' days ago';
     p.textContent = (meta.name && meta.name !== 'Untitled' ? meta.name + ' — ' : '') +
-      meta.pieces + ' piece' + (meta.pieces === 1 ? '' : 's') + ', ' + meta.hung + ' hung · saved ' + when;
+      meta.pieces + ' piece' + (meta.pieces === 1 ? '' : 's') + ', ' + meta.hung + ' hung · saved ' + when +
+      (open && meta.id === project.id && isDirty() ? ' · goes back to that save' : '');
     $('#go-continue').disabled = false;
   } else {
     p.textContent = 'Nothing saved in this browser yet';
@@ -2899,9 +3280,14 @@ $('#t-export').addEventListener('click', (e) => {
 $('#wall-select').addEventListener('change', e => {
   project.activeWallId = e.target.value;
   selection = [];
-  history.past.length = 0; history.future.length = 0;
+  resetHistory();
   render();
 });
+$('#proj-name').addEventListener('change', e => {
+  project.name = e.target.value.trim() || 'Untitled';
+  updateTopbar();
+});
+$('#proj-name').addEventListener('keydown', e => { if (e.key === 'Enter') e.target.blur(); });
 $('#wall-edit').addEventListener('click', () => { if (wall()) WallSheet.open(wall().id); });
 $('#wall-add').addEventListener('click', () => WallSheet.open(null));
 $('#btn-add-art').addEventListener('click', () => ArtSheet.open(null));
@@ -2909,15 +3295,12 @@ $('#btn-undo').addEventListener('click', undo);
 $('#btn-redo').addEventListener('click', redo);
 $('#btn-save').addEventListener('click', saveSession);
 $('#btn-plan').addEventListener('click', () => Plan.open());
-$('#go-home').addEventListener('click', () => {
-  if (isDirty() && !confirm('You have changes that are not saved. Leave anyway?')) return;
-  showStart();
-});
+// Going to the start screen closes nothing — the project stays open behind it —
+// so there is nothing to warn about until something would actually replace it.
+$('#go-home').addEventListener('click', showStart);
 $$('#units button').forEach(b => b.addEventListener('click', () => {
   project.units = b.dataset.u;
   render();
-  if (!$('#sheet-art').classList.contains('hidden')) { setUnitLabels($('#sheet-art')); }
-  if (!$('#sheet-wall').classList.contains('hidden')) { setUnitLabels($('#sheet-wall')); }
 }));
 [['#t-guides','guides'],['#t-ruler','ruler'],['#t-tags','tags'],['#t-outline','outline']]
   .forEach(([sel, key]) => $(sel).addEventListener('click', () => {
@@ -2936,57 +3319,98 @@ window.addEventListener('keydown', (e) => {
     (tag === 'input' && NOT_TEXT.indexOf((e.target.type || 'text').toLowerCase()) < 0);
   const meta = e.metaKey || e.ctrlKey;
 
-  if (meta && e.key.toLowerCase() === 'z') {
-    e.preventDefault(); e.shiftKey ? redo() : undo(); return;
-  }
-  if (meta && e.key.toLowerCase() === 's') { e.preventDefault(); saveSession(); return; }
+  const key = e.key.toLowerCase();
+  const inApp = !$('#app').classList.contains('hidden');
+  const sheet = $('.sheet:not(.hidden)');
+
+  if (meta && key === 's') { e.preventDefault(); if (inApp) saveSession(); return; }
   if (e.key === 'Escape') {
     closeMenu();
     if (typing) { e.target.blur(); return; }
+    if (Plan.isOpen) { Plan.close(); return; }
+    if (sheet) { ArtSheet.escape(); return; }
     if (selection.length) { selection = []; render(); }
     return;
   }
+  // Everything below acts on the wall, so none of it applies while an editor
+  // is covering the wall — least of all an undo you cannot see happen.
+  if (!inApp || sheet) return;
+  if (meta && (key === 'z' || key === 'y')) {
+    e.preventDefault(); (key === 'y' || e.shiftKey) ? redo() : undo(); return;
+  }
   if (typing) return;
-  if ($('#app').classList.contains('hidden')) return;
-  if ($('.sheet:not(.hidden)')) return;
 
   const w = wall();
-  if (meta && e.key.toLowerCase() === 'a') {
+  if (meta && key === 'a') {
     e.preventDefault();
     if (w) { selection = w.layout.map(i => i.id); render(); }
     return;
   }
-  if (meta && e.key.toLowerCase() === 'd') { e.preventDefault(); duplicateSelection(); return; }
+  if (meta && key === 'd') { e.preventDefault(); duplicateSelection(); return; }
+  if (meta || e.altKey) return;   // leave the browser's own shortcuts alone
   if (e.key === 'Delete' || e.key === 'Backspace') {
     if (selection.length) { e.preventDefault(); removeSelection(); }
     return;
   }
-  const step = e.shiftKey ? 10 : 1;
+  const step = Units.nudge(e.shiftKey);
   const moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] };
   if (moves[e.key] && selection.length) { e.preventDefault(); nudge(moves[e.key][0], moves[e.key][1]); }
 });
 
 /* ---- start screen ---- */
-$('#go-new').addEventListener('click', () => {
-  project = blankProject();
-  history.past.length = 0; history.future.length = 0;
+// Any of these replaces the project that is open, so each one asks first if
+// that would lose something.
+const okToReplace = () => !project.walls.length || !isDirty() ||
+  confirm('The project you have open has changes that are not saved. Replace it anyway?');
+function adopt(p) {
+  project = p;
+  resetHistory();
   selection = [];
   markSaved();
   showApp();
-});
+}
+async function openProjectFile(f) {
+  if (!f || !okToReplace()) return;
+  let p;
+  try { p = normalizeProject(JSON.parse(await readAs(f, 'readAsText'))); }
+  catch (err) { alert("That file isn't a Picture This project."); return; }
+  adopt(p);
+}
+$('#go-back').addEventListener('click', showApp);
+$('#go-new').addEventListener('click', () => { if (okToReplace()) adopt(blankProject()); });
 $('#go-continue').addEventListener('click', () => {
-  if (loadSession()) { history.past.length = 0; history.future.length = 0; selection = []; markSaved(); showApp(); }
+  if (!okToReplace()) return;
+  const before = project;
+  if (loadSession()) adopt(project); else project = before;
 });
-$('#file-project').addEventListener('change', async (e) => {
+$('#go-open').addEventListener('click', () => $('#file-project').click());
+$('#file-project').addEventListener('change', (e) => {
   const f = e.target.files && e.target.files[0];
   e.target.value = '';
+  openProjectFile(f);
+});
+
+/* ---- dropping files ----
+   Without this a photo dropped a few pixels wide of its target makes the
+   browser navigate to the image, and the project is gone. So every drop is
+   caught, and sent wherever it most plausibly belongs. */
+const carriesFiles = (e) => e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') >= 0;
+window.addEventListener('dragover', (e) => { if (carriesFiles(e)) e.preventDefault(); });
+window.addEventListener('drop', (e) => {
+  if (!carriesFiles(e)) return;
+  e.preventDefault();
+  const f = e.dataTransfer.files[0];
   if (!f) return;
-  try { project = normalizeProject(JSON.parse(await readAs(f, 'readAsText'))); }
-  catch (err) { alert("That file isn't a Picture This project."); return; }
-  history.past.length = 0; history.future.length = 0;
-  selection = [];
-  markSaved();
-  showApp();
+  const shown = (sel) => !$(sel).classList.contains('hidden');
+  if (/\.json$/i.test(f.name) || f.type === 'application/json') {
+    if (shown('#start')) openProjectFile(f);
+    else toast('Project files open from the start screen — click "Picture This", top left.');
+    return;
+  }
+  if (!/^image\//.test(f.type)) { toast('That is not an image.'); return; }
+  if (shown('#sheet-wall')) WallSheet.addFile(f);
+  else if (shown('#sheet-art')) ArtSheet.addFile(f);
+  else if (shown('#app') && !Plan.isOpen) ArtSheet.open(null, f);
 });
 
 window.addEventListener('beforeunload', (e) => {
